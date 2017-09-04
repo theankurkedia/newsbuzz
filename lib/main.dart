@@ -1,5 +1,8 @@
-
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import './homeScreen.dart' as homeScreeen;
 import './bookmarksScreen.dart' as bookmarkScreen;
 
@@ -16,11 +19,32 @@ class  NewsApp extends StatefulWidget {
 
 class NewsAppState extends State<NewsApp> with SingleTickerProviderStateMixin {
 	TabController controller;
+	final googleSignIn = new GoogleSignIn();
+	final analytics = new FirebaseAnalytics();
+	final auth = FirebaseAuth.instance;
 
+	Future<Null> _ensureLoggedIn() async {
+		GoogleSignInAccount user = googleSignIn.currentUser;
+		if (user == null)
+			user = await googleSignIn.signInSilently();
+		if (user == null) {
+			await googleSignIn.signIn();
+			analytics.logLogin();
+		}
+		if (await auth.currentUser() == null) {
+			GoogleSignInAuthentication credentials =
+			await googleSignIn.currentUser.authentication;
+			await auth.signInWithGoogle(
+				idToken: credentials.idToken,
+				accessToken: credentials.accessToken,
+			);
+		}
+	}
 	@override
 	void initState() {
 		super.initState();
 		controller = new TabController(vsync: this, length: 2);
+		_ensureLoggedIn();
 	}
 
 	@override

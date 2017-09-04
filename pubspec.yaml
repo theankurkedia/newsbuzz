@@ -10,6 +10,11 @@ dev_dependencies:
     sdk: flutter
   share: "^0.2.1"
   flutter_webview_plugin: "^0.0.6"
+  google_sign_in: "^0.3.1"
+  firebase_analytics: "^0.1.0"
+  firebase_auth: "^0.2.0"
+  firebase_database: "^0.1.0"
+  firebase_storage: "^0.0.5"
 
 
 # For information on the generic Dart part of this file, see the

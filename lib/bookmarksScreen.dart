@@ -13,7 +13,6 @@ class BookmarksScreen extends StatefulWidget {
 class _BookmarksScreenState extends State<BookmarksScreen> {
 	var data;
 	final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
-
 	_containsArticle(article){
 		for( var i in globals.bookmarks){
 			if( i['url'].compareTo(article['url']) == 0 )

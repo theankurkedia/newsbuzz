@@ -2,8 +2,12 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import './globals.dart' as globals;
 
@@ -17,7 +21,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
 	var data;
 	var sources;
+	var user;
 	final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
+	final googleSignIn = new GoogleSignIn();
+	final analytics = new FirebaseAnalytics();
+	final auth = FirebaseAuth.instance;
+	final reference = FirebaseDatabase.instance.reference();
 
 	Future getData() async {
 		var response = await http.get(Uri.encodeFull('http://newsapi.org/v1/articles?source=techcrunch&sortBy=top&apiKey=ab31ce4a49814a27bbb16dd5c5c06608'),
@@ -48,6 +57,10 @@ class _HomeScreenState extends State<HomeScreen> {
 		int articleIndex = _containsArticle(article);
 		if(articleIndex == -1) {
 			globals.bookmarks.add(article);
+			print(article);
+			reference.push().set({
+				'text': article,
+			});
 			this.setState(() {globals.bookmarks = globals.bookmarks;});
 			Scaffold.of(context).showSnackBar(new SnackBar(
 				content: new Text('Bookmark added'),
