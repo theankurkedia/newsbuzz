@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:share/share.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
-import './globals.dart' as globals;
+import '../lib/globals.dart' as globals;
 
 class BookmarksScreen extends StatefulWidget {
   BookmarksScreen({Key key}) : super(key: key);

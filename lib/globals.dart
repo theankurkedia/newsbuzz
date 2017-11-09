@@ -1,3 +1,3 @@
 library news.globals;
 
-List bookmarks=new List();
+String userId;

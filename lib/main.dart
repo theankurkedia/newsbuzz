@@ -5,14 +5,15 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import './homeScreen.dart' as homeScreeen;
 import './bookmarksScreen.dart' as bookmarkScreen;
-
+import './libraryScreen.dart' as libraryScreen;
+import './globals.dart' as globals;
 void main() {
 	runApp(new MaterialApp(
 		home: new NewsApp()
 	));
 }
 
-class  NewsApp extends StatefulWidget {
+class NewsApp extends StatefulWidget {
 	@override
 	 createState() => new NewsAppState();
 }
@@ -32,18 +33,19 @@ class NewsAppState extends State<NewsApp> with SingleTickerProviderStateMixin {
 			analytics.logLogin();
 		}
 		if (await auth.currentUser() == null) {
-			GoogleSignInAuthentication credentials =
-			await googleSignIn.currentUser.authentication;
+			GoogleSignInAuthentication credentials = await googleSignIn.currentUser.authentication;
 			await auth.signInWithGoogle(
 				idToken: credentials.idToken,
 				accessToken: credentials.accessToken,
 			);
 		}
+		globals.userId = user.id;
+		//set user id from user and then map it to firebase database
 	}
 	@override
 	void initState() {
 		super.initState();
-		controller = new TabController(vsync: this, length: 2);
+		controller = new TabController(vsync: this, length: 3);
 		_ensureLoggedIn();
 	}
 
@@ -64,8 +66,9 @@ class NewsAppState extends State<NewsApp> with SingleTickerProviderStateMixin {
 				child: new TabBar(
 					controller: controller,
 					tabs: <Tab>[
-						new Tab(icon: new Icon(Icons.home), text: "For You"),
-						new Tab(icon: new Icon(Icons.bookmark), text: "Read Later"),
+						new Tab(icon: new Icon(Icons.view_headline)),
+						new Tab(icon: new Icon(Icons.view_module)),
+						new Tab(icon: new Icon(Icons.bookmark)),
 					]
 				)
 			),
@@ -73,7 +76,8 @@ class NewsAppState extends State<NewsApp> with SingleTickerProviderStateMixin {
 				controller: controller,
 				children: <Widget>[
 					new homeScreeen.HomeScreen(),
-					new bookmarkScreen.BookmarksScreen()
+					new libraryScreen.LibraryScreen(),
+					new bookmarkScreen.BookmarksScreen(),
 				]
 			)
 		);

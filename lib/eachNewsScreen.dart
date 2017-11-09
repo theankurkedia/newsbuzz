@@ -9,19 +9,21 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import './globals.dart' as globals;
 
-class HomeScreen extends StatefulWidget {
-	HomeScreen({Key key}) : super(key: key);
-
+class EachNewsScreen extends StatefulWidget {
+	EachNewsScreen({Key key, this.sourceId = "techcrunch", this.sourceName="TechCrunch" }) : super(key: key);
+	final sourceId;
+	final sourceName;
 	@override
-	_HomeScreenState createState() => new _HomeScreenState();
+	_EachNewsScreenState createState() => new _EachNewsScreenState(sourceId: this.sourceId, sourceName:this.sourceName);
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _EachNewsScreenState extends State<EachNewsScreen> {
+	_EachNewsScreenState({this.sourceId, this.sourceName });
 	var data;
-	var sources;
-	var user;
+	final sourceId;
+	final sourceName;
+	// var user;
 	bool change= false;
-	var newsSelection = "techcrunch";
 	DataSnapshot snapshot;
 	final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
 	final auth = FirebaseAuth.instance;
@@ -29,31 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
 	var userDatabaseReference;
 	var articleDatabaseReference;
 
-	// Future<Null> _ensureLoggedIn() async {
-	// 	GoogleSignInAccount user = googleSignIn.currentUser;
-	// 	if (user == null)
-	// 		user = await googleSignIn.signInSilently();
-	// 	if (user == null) {
-	// 		await googleSignIn.signIn();
-	// 		analytics.logLogin();
-	// 	}
-	// 	if (await auth.currentUser() == null) {
-	// 		GoogleSignInAuthentication credentials = await googleSignIn.currentUser.authentication;
-	// 		await auth.signInWithGoogle(
-	// 			idToken: credentials.idToken,
-	// 			accessToken: credentials.accessToken,
-	// 		);
-	// 	}
-	// 	globals.userId = user.id;
-	// 	//set user id from user and then map it to firebase database
-	// }
 	Future getData() async {
-		var response = await http.get(Uri.encodeFull('http://newsapi.org/v1/articles?source='+newsSelection+'&sortBy=top&apiKey=ab31ce4a49814a27bbb16dd5c5c06608'),
-			headers: {
-				"Accept": "application/json"
-			}
-		);
-		var responseSources = await http.get(Uri.encodeFull('https://newsapi.org/v1/sources?language=en'),
+		var response = await http.get(Uri.encodeFull('http://newsapi.org/v1/articles?source='+sourceId+'&sortBy=top&apiKey=ab31ce4a49814a27bbb16dd5c5c06608'),
 			headers: {
 				"Accept": "application/json"
 			}
@@ -63,9 +42,9 @@ class _HomeScreenState extends State<HomeScreen> {
 		var snap = await articleDatabaseReference.once();
 		this.setState(() {
 			data = JSON.decode(response.body);
-			sources = JSON.decode(responseSources.body);
 			snapshot = snap;
 		});
+
 		return "Success!";
 	}
 	_hasArticle(article) {
@@ -74,10 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
 			int flag=0;
 			if(value!= null){
 				value.forEach((k,v){
-					if( v['url'].compareTo(article['url']) == 0 ){
+					if( v['url'].compareTo(article['url']) == 0 )
 						flag=1;
-						// return true;
-					}
 				});
 				if(flag==1)
 					return true;
@@ -88,7 +65,6 @@ class _HomeScreenState extends State<HomeScreen> {
 		return false;
 	}
 	pushArticle(article){
-		print("push article called");
 		articleDatabaseReference.push().set({
 				'author': article['author'],
 				'description': article['description'],
@@ -99,7 +75,6 @@ class _HomeScreenState extends State<HomeScreen> {
 			});
 	}
 	_onBookmarkTap(article) {
-		print("Bookmark tap called");
 		if(snapshot.value!=null) {
 			var value = snapshot.value;
 			int flag=0;
@@ -120,25 +95,17 @@ class _HomeScreenState extends State<HomeScreen> {
 					backgroundColor: Colors.grey[600],
 				));
 			}
-		} else {
+			this.setState(() {change = true;});
+		}  else {
 				pushArticle(article);
-		}
-		this.setState(() {change = true;});
-	}
-	_findSourceName(id) {
-		for( var i in sources["sources"]){
-			if( i["id"].compareTo(id) == 0 )
-				return i["name"];
 		}
 	}
 	_refresh(){
 		this.getData();
 	}
 
-	@override
 	void initState() {
 		super.initState();
-		// _ensureLoggedIn();
 		this.getData();
 	}
 
@@ -157,6 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
 	@override
 	Widget build(BuildContext context) {
 		return new Scaffold(
+			appBar: new AppBar(title: new Text(sourceName)),
 			backgroundColor: Colors.grey[200],
 			body: new GestureDetector(
 				child: data==null? const Center(
@@ -187,14 +155,17 @@ class _HomeScreenState extends State<HomeScreen> {
 															),
 														),
 														new Row(
-															crossAxisAlignment: CrossAxisAlignment.end,
 															children: <Widget>[
-																new Text(
-																	"Source: ${_findSourceName(data["source"])}",
-																	style: new TextStyle(
+																new Padding(
+																	padding: new EdgeInsets.all(5.0),
+																	child: data["articles"][index]["author"] != null?
+																		new Text( "Author: ${data["articles"][index]["author"]}",
+																		style: new TextStyle(
 																			fontWeight: FontWeight.w500,
 																			color: Colors.black,
 																		),
+																	):
+																		null
 																),
 															],
 														),
@@ -241,4 +212,4 @@ class _HomeScreenState extends State<HomeScreen> {
 	}
 }
 
-//find something related to bind and use function _hasArticle with it. RIght now it keeps on rendering 
+//merge homeScreen and eachNewScreen
