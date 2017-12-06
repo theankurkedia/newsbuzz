@@ -86,12 +86,12 @@ PODS:
 DEPENDENCIES:
   - firebase_analytics (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/firebase_analytics-0.1.1/ios`)
   - firebase_auth (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/firebase_auth-0.2.5/ios`)
-  - firebase_database (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/firebase_database-0.1.2/ios`)
+  - firebase_database (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/firebase_database-0.1.4/ios`)
   - firebase_storage (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/firebase_storage-0.0.7/ios`)
   - Flutter (from `/Users/ankurkedia/flutter/bin/cache/artifacts/engine/ios`)
   - flutter_webview_plugin (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/flutter_webview_plugin-0.0.9/ios`)
   - google_sign_in (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/google_sign_in-0.3.1/ios`)
-  - share (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/share-0.2.1/ios`)
+  - share (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/share-0.2.2/ios`)
 
 EXTERNAL SOURCES:
   firebase_analytics:
@@ -99,7 +99,7 @@ EXTERNAL SOURCES:
   firebase_auth:
     :path: /Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/firebase_auth-0.2.5/ios
   firebase_database:
-    :path: /Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/firebase_database-0.1.2/ios
+    :path: /Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/firebase_database-0.1.4/ios
   firebase_storage:
     :path: /Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/firebase_storage-0.0.7/ios
   Flutter:
@@ -109,7 +109,7 @@ EXTERNAL SOURCES:
   google_sign_in:
     :path: /Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/google_sign_in-0.3.1/ios
   share:
-    :path: /Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/share-0.2.1/ios
+    :path: /Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/share-0.2.2/ios
 
 SPEC CHECKSUMS:
   Firebase: 052c0de688fc87b414996eea13e223dd9fee3fa2
