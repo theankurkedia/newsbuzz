@@ -5,7 +5,7 @@ import 'package:share/share.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
-import './globals.dart' as globals;
+import './globalStore.dart' as globalStore;
 
 class BookmarksScreen extends StatefulWidget {
   BookmarksScreen({Key key}) : super(key: key);
@@ -17,18 +17,13 @@ class BookmarksScreen extends StatefulWidget {
 class _BookmarksScreenState extends State<BookmarksScreen> {
   DataSnapshot snapshot;
   bool change = false;
-  final databaseReference = FirebaseDatabase.instance.reference();
-  var articleDatabaseReference;
   final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
 
   Future updateSnapshot() async {
-    articleDatabaseReference =
-        databaseReference.child(globals.userId).child('articles');
-    var snap = await articleDatabaseReference.once();
+    var snap = await globalStore.articleDatabaseReference.once();
     this.setState(() {
       snapshot = snap;
     });
-
     return "Success!";
   }
 
@@ -38,38 +33,18 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
     this.updateSnapshot();
   }
 
-  pushArticle(article) {
-    articleDatabaseReference.push().set({
-      'author': article['author'],
-      'description': article['description'],
-      'publishedAt': article['publishedAt'],
-      'title': article['title'],
-      'url': article['url'],
-      'urlToImage': article['urlToImage'],
-    });
-  }
-
   _onBookmarkTap(article) {
     if (snapshot.value != null) {
       var value = snapshot.value;
-      int flag = 0;
       value.forEach((k, v) {
         if (v['url'].compareTo(article['url']) == 0) {
-          flag = 1;
-          articleDatabaseReference.child(k).remove();
+          globalStore.articleDatabaseReference.child(k).remove();
           Scaffold.of(context).showSnackBar(new SnackBar(
                 content: new Text('Bookmark removed'),
                 backgroundColor: Colors.grey[600],
               ));
         }
       });
-      if (flag != 1) {
-        pushArticle(article);
-        Scaffold.of(context).showSnackBar(new SnackBar(
-              content: new Text('Bookmark added'),
-              backgroundColor: Colors.grey[600],
-            ));
-      }
       this.updateSnapshot();
       this.setState(() {
         change = true;
@@ -97,7 +72,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
               children: <Widget>[
                 new Flexible(
                     child: new FirebaseAnimatedList(
-                  query: articleDatabaseReference,
+                  query: globalStore.articleDatabaseReference,
                   sort: (a, b) => b.key.compareTo(a.key),
                   padding: new EdgeInsets.all(8.0),
                   itemBuilder: (_, DataSnapshot snapshot,
@@ -183,10 +158,10 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
               child: new Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  new Icon(Icons.bookmark_border,
+                  new Icon(Icons.chrome_reader_mode,
                       color: Colors.grey, size: 60.0),
                   new Text(
-                    "No Bookmarks",
+                    "No articles saved",
                     style: new TextStyle(fontSize: 24.0, color: Colors.grey),
                   ),
                 ],
@@ -195,20 +170,3 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
     );
   }
 }
-
-//For empty bookmark screen add this
-// (snapshot != null && snapshot.value != null)
-// : new Center(
-//                     child: new Column(
-//                       mainAxisAlignment: MainAxisAlignment.center,
-//                       children: [
-//                         new Icon(Icons.bookmark_border,
-//                             color: Colors.grey, size: 60.0),
-//                         new Text(
-//                           "No Bookmarks",
-//                           style:
-//                               new TextStyle(fontSize: 24.0, color: Colors.grey),
-//                         ),
-//                       ],
-//                     ),
-//                   ),

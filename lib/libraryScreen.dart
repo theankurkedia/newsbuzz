@@ -6,8 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
-import './eachNewsScreen.dart' as eachNewsScreen;
-import './globals.dart' as globals;
+import './sourcesScreen.dart' as sourcesScreen;
+import './globalStore.dart' as globalStore;
 
 class LibraryScreen extends StatefulWidget {
   LibraryScreen({Key key}) : super(key: key);
@@ -20,19 +20,17 @@ class _LibraryScreenState extends State<LibraryScreen> {
   DataSnapshot snapshot;
   var sources;
   bool change = false;
-  final databaseReference = FirebaseDatabase.instance.reference();
-  var userDatabaseReference;
-  var articleSourcesDatabaseReference;
   final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
 
   Future getData() async {
     var libSources = await http.get(
-        Uri.encodeFull('https://newsapi.org/v1/sources?language=en'),
-        headers: {"Accept": "application/json"});
-    userDatabaseReference = databaseReference.child(globals.userId);
-    articleSourcesDatabaseReference = userDatabaseReference.child('sources');
-    var snap = await articleSourcesDatabaseReference.once();
+        Uri.encodeFull('https://newsapi.org/v2/sources?language=en'),
+        headers: {
+          "Accept": "application/json",
+          "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
+        });
 
+    var snap = await globalStore.articleSourcesDatabaseReference.once();
     this.setState(() {
       sources = JSON.decode(libSources.body);
       snapshot = snap;
@@ -57,8 +55,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   pushSource(name, id) {
-    print('push source');
-    articleSourcesDatabaseReference.push().set({
+    globalStore.articleSourcesDatabaseReference.push().set({
       'name': name,
       'id': id,
     });
@@ -75,7 +72,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 content: new Text('News source removed'),
                 backgroundColor: Colors.grey[600],
               ));
-          articleSourcesDatabaseReference.child(k).remove();
+          globalStore.articleSourcesDatabaseReference.child(k).remove();
         }
       });
       if (flag != 1) {
@@ -92,7 +89,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
     this.setState(() {
       change = true;
     });
-    print(snapshot.value);
   }
 
   @override
@@ -188,12 +184,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         Navigator.push(
                             context,
                             new MaterialPageRoute(
-                                builder: (_) =>
-                                    new eachNewsScreen.EachNewsScreen(
-                                        sourceId: sources['sources'][index]
-                                            ['id'],
-                                        sourceName: sources['sources'][index]
-                                            ['name'])));
+                                builder: (_) => new sourcesScreen.SourcesScreen(
+                                    sourceId: sources['sources'][index]['id'],
+                                    sourceName: sources['sources'][index]
+                                        ['name'])));
                       },
                     ),
                   ),

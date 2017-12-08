@@ -2,49 +2,54 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import './globalStore.dart' as globalStore;
 
-class HomeScreen extends StatefulWidget {
-  HomeScreen({Key key}) : super(key: key);
-
+class SourcesScreen extends StatefulWidget {
+  SourcesScreen(
+      {Key key, this.sourceId = "techcrunch", this.sourceName = "TechCrunch"})
+      : super(key: key);
+  final sourceId;
+  final sourceName;
   @override
-  _HomeScreenState createState() => new _HomeScreenState();
+  _SourcesScreenState createState() => new _SourcesScreenState(
+      sourceId: this.sourceId, sourceName: this.sourceName);
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _SourcesScreenState extends State<SourcesScreen> {
+  _SourcesScreenState({this.sourceId, this.sourceName});
   var data;
-  var user;
+  final sourceId;
+  final sourceName;
   bool change = false;
-  var newsSelection = "bbc-news";
   DataSnapshot snapshot;
   final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
+  final auth = FirebaseAuth.instance;
+  final databaseReference = FirebaseDatabase.instance.reference();
+  var userDatabaseReference;
+  var articleDatabaseReference;
 
   Future getData() async {
-    await globalStore.logIn;
-    var snapSources = await globalStore.articleSourcesDatabaseReference.once();
-    var snap = await globalStore.articleDatabaseReference.once();
-    if (snapSources.value != null) {
-      newsSelection = '';
-      snapSources.value.forEach((key, source) {
-        newsSelection = newsSelection + source['id'] + ',';
-      });
-    }
     var response = await http.get(
         Uri.encodeFull(
-            'https://newsapi.org/v2/top-headlines?sources=' + newsSelection),
+            'https://newsapi.org/v2/top-headlines?sources=' + sourceId),
         headers: {
           "Accept": "application/json",
           "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
         });
 
+    userDatabaseReference = databaseReference.child(globalStore.userId);
+    articleDatabaseReference = userDatabaseReference.child('articles');
+    var snap = await articleDatabaseReference.once();
     this.setState(() {
       data = JSON.decode(response.body);
       snapshot = snap;
     });
+
     return "Success!";
   }
 
@@ -54,19 +59,19 @@ class _HomeScreenState extends State<HomeScreen> {
       int flag = 0;
       if (value != null) {
         value.forEach((k, v) {
-          if (v['url'].compareTo(article['url']) == 0) {
-            flag = 1;
-            return true;
-          }
+          if (v['url'].compareTo(article['url']) == 0) flag = 1;
         });
-        if (flag == 1) return true;
+        if (flag == 1)
+          return true;
+        else
+          return false;
       }
     }
     return false;
   }
 
   pushArticle(article) {
-    globalStore.articleDatabaseReference.push().set({
+    articleDatabaseReference.push().set({
       'author': article['author'],
       'description': article['description'],
       'publishedAt': article['publishedAt'],
@@ -83,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
       value.forEach((k, v) {
         if (v['url'].compareTo(article['url']) == 0) {
           flag = 1;
-          globalStore.articleDatabaseReference.child(k).remove();
+          articleDatabaseReference.child(k).remove();
           Scaffold.of(context).showSnackBar(new SnackBar(
                 content: new Text('Bookmark removed'),
                 backgroundColor: Colors.grey[600],
@@ -91,26 +96,24 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       });
       if (flag != 1) {
+        pushArticle(article);
         Scaffold.of(context).showSnackBar(new SnackBar(
               content: new Text('Bookmark added'),
               backgroundColor: Colors.grey[600],
             ));
-        pushArticle(article);
       }
+      this.setState(() {
+        change = true;
+      });
     } else {
       pushArticle(article);
     }
-    this.getData();
-    this.setState(() {
-      change = true;
-    });
   }
 
   _refresh() {
     this.getData();
   }
 
-  @override
   void initState() {
     super.initState();
     this.getData();
@@ -130,13 +133,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (data != null && data["articles"] != null) {
-      data["articles"].sort((a, b) =>
-          a["publishedAt"] != null && b["publishedAt"] != null
-              ? b["publishedAt"].compareTo(a["publishedAt"])
-              : null);
-    }
     return new Scaffold(
+      appBar: new AppBar(title: new Text(sourceName)),
       backgroundColor: Colors.grey[200],
       body: new GestureDetector(
         child: data == null
@@ -144,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const CupertinoActivityIndicator(),
               )
             : new ListView.builder(
-                itemCount: data == null ? 0 : data["articles"].length,
+                itemCount: data == null ? 0 : data.length,
                 itemBuilder: (BuildContext context, int index) {
                   return new GestureDetector(
                     child: new Card(
@@ -168,7 +166,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   new Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
                                     children: <Widget>[
                                       new Text(
                                         "Source: ${ data["articles"][index]["source"]["name"]}",
@@ -176,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           fontWeight: FontWeight.w500,
                                           color: Colors.black,
                                         ),
-                                      ),
+                                      )
                                     ],
                                   ),
                                 ],
@@ -230,3 +227,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+//merge homeScreen and eachNewScreen
