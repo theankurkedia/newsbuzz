@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import './homeScreen.dart' as homeScreeen;
-import './bookmarksScreen.dart' as bookmarkScreen;
-import './libraryScreen.dart' as libraryScreen;
+import './HomeScreen.dart' as HomeScreeen;
+import './BookmarkScreen.dart' as BookmarkScreen;
+import './LibraryScreen.dart' as LibraryScreen;
 import './globalStore.dart' as globalStore;
 
 void main() {
@@ -47,9 +47,9 @@ class NewsAppState extends State<NewsApp> with SingleTickerProviderStateMixin {
               new Tab(icon: new Icon(Icons.bookmark)),
             ])),
         body: new TabBarView(controller: controller, children: <Widget>[
-          new homeScreeen.HomeScreen(),
-          new libraryScreen.LibraryScreen(),
-          new bookmarkScreen.BookmarksScreen(),
+          new HomeScreeen.HomeScreen(),
+          new LibraryScreen.LibraryScreen(),
+          new BookmarkScreen.BookmarksScreen(),
         ]));
   }
 }

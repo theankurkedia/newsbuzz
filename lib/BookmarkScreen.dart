@@ -99,16 +99,15 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                                       ),
                                     ),
                                     new Padding(
-                                        padding: new EdgeInsets.all(5.0),
-                                        child: snapshot.value["author"] != null
-                                            ? new Text(
-                                                "Author: ${snapshot.value["author"]}",
-                                                style: new TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.black,
-                                                ),
-                                              )
-                                            : null),
+                                      padding: new EdgeInsets.all(5.0),
+                                      child: new Text(
+                                        "Source: ${snapshot.value["source"]}",
+                                        style: new TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 onTap: () {

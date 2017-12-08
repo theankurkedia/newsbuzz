@@ -2,45 +2,49 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import './globalStore.dart' as globalStore;
-import './SearchScreen.dart' as SearchScreen;
 
-class HomeScreen extends StatefulWidget {
-  HomeScreen({Key key}) : super(key: key);
-
+class SearchScreen extends StatefulWidget {
+  SearchScreen({
+    Key key,
+    this.searchQuery = "",
+  })
+      : super(key: key);
+  final searchQuery;
   @override
-  _HomeScreenState createState() => new _HomeScreenState();
+  _SearchScreenState createState() =>
+      new _SearchScreenState(searchQuery: this.searchQuery);
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _SearchScreenState extends State<SearchScreen> {
+  _SearchScreenState({this.searchQuery});
+
+  var searchQuery;
   var data;
-  var user;
   bool change = false;
-  var newsSelection = "bbc-news";
   DataSnapshot snapshot;
   final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
-  final TextEditingController _controller = new TextEditingController();
+  final auth = FirebaseAuth.instance;
+  final databaseReference = FirebaseDatabase.instance.reference();
+  var userDatabaseReference;
+  var articleDatabaseReference;
+
   Future getData() async {
-    await globalStore.logIn;
-    var snapSources = await globalStore.articleSourcesDatabaseReference.once();
-    var snap = await globalStore.articleDatabaseReference.once();
-    if (snapSources.value != null) {
-      newsSelection = '';
-      snapSources.value.forEach((key, source) {
-        newsSelection = newsSelection + source['id'] + ',';
-      });
-    }
     var response = await http.get(
-        Uri.encodeFull(
-            'https://newsapi.org/v2/top-headlines?sources=' + newsSelection),
+        Uri.encodeFull('https://newsapi.org/v2/everything?q=' +
+            searchQuery +
+            '&sortBy=popularity'),
         headers: {
           "Accept": "application/json",
           "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
         });
+
+    var snap = await globalStore.articleDatabaseReference.once();
 
     this.setState(() {
       data = JSON.decode(response.body);
@@ -55,19 +59,19 @@ class _HomeScreenState extends State<HomeScreen> {
       int flag = 0;
       if (value != null) {
         value.forEach((k, v) {
-          if (v['url'].compareTo(article['url']) == 0) {
-            flag = 1;
-            return true;
-          }
+          if (v['url'].compareTo(article['url']) == 0) flag = 1;
         });
-        if (flag == 1) return true;
+        if (flag == 1)
+          return true;
+        else
+          return false;
       }
     }
     return false;
   }
 
   pushArticle(article) {
-    globalStore.articleDatabaseReference.push().set({
+    articleDatabaseReference.push().set({
       'source': article["source"]["name"],
       'description': article['description'],
       'publishedAt': article['publishedAt'],
@@ -84,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
       value.forEach((k, v) {
         if (v['url'].compareTo(article['url']) == 0) {
           flag = 1;
-          globalStore.articleDatabaseReference.child(k).remove();
+          articleDatabaseReference.child(k).remove();
           Scaffold.of(context).showSnackBar(new SnackBar(
                 content: new Text('Bookmark removed'),
                 backgroundColor: Colors.grey[600],
@@ -92,36 +96,24 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       });
       if (flag != 1) {
+        pushArticle(article);
         Scaffold.of(context).showSnackBar(new SnackBar(
               content: new Text('Bookmark added'),
               backgroundColor: Colors.grey[600],
             ));
-        pushArticle(article);
       }
+      this.setState(() {
+        change = true;
+      });
     } else {
       pushArticle(article);
     }
-    this.getData();
-    this.setState(() {
-      change = true;
-    });
   }
 
   _refresh() {
     this.getData();
   }
 
-  void handleTextInputSubmit(var input) {
-    if (input != '') {
-      Navigator.push(
-          context,
-          new MaterialPageRoute(
-              builder: (_) =>
-                  new SearchScreen.SearchScreen(searchQuery: input)));
-    }
-  }
-
-  @override
   void initState() {
     super.initState();
     this.getData();
@@ -129,7 +121,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Column buildButtonColumn(IconData icon) {
     Color color = Theme.of(context).primaryColor;
-
     return new Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -139,31 +130,25 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  @override
   Widget build(BuildContext context) {
-    if (data != null && data["articles"] != null) {
-      data["articles"].sort((a, b) =>
-          a["publishedAt"] != null && b["publishedAt"] != null
-              ? b["publishedAt"].compareTo(a["publishedAt"])
-              : null);
-    }
     return new Scaffold(
-      backgroundColor: Colors.grey[200],
+      appBar: new AppBar(title: new Text(searchQuery)),
       body: new GestureDetector(
-        child: new Column(children: <Widget>[
-          new TextField(
-            controller: _controller,
-            onSubmitted: handleTextInputSubmit,
-            decoration: new InputDecoration(
-                hintText: 'Finding Something?', icon: new Icon(Icons.search)),
-          ),
-          new Expanded(
-            child: data == null
-                ? const Center(
-                    child: const CupertinoActivityIndicator(),
+        child: data == null
+            ? const Center(
+                child: const CupertinoActivityIndicator(),
+              )
+            : data["articles"].length < 1
+                ? new Center(
+                    child: new Text(
+                      "Could not find anything related to '$searchQuery'",
+                      style: new TextStyle(
+                        color: Colors.black,
+                      ),
+                    ),
                   )
                 : new ListView.builder(
-                    itemCount: data == null ? 0 : data["articles"].length,
+                    itemCount: data['articles'].length,
                     itemBuilder: (BuildContext context, int index) {
                       return new GestureDetector(
                         child: new Card(
@@ -188,8 +173,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
                                       new Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
                                         children: <Widget>[
                                           new Text(
                                             "Source: ${ data["articles"][index]["source"]["name"]}",
@@ -197,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               fontWeight: FontWeight.w500,
                                               color: Colors.black,
                                             ),
-                                          ),
+                                          )
                                         ],
                                       ),
                                     ],
@@ -248,8 +231,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                   ),
-          )
-        ]),
         onVerticalDragDown: _refresh(),
       ),
     );

@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
-import './sourcesScreen.dart' as sourcesScreen;
+import './SourcesScreen.dart' as SourcesScreen;
 import './globalStore.dart' as globalStore;
 
 class LibraryScreen extends StatefulWidget {
@@ -184,7 +184,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         Navigator.push(
                             context,
                             new MaterialPageRoute(
-                                builder: (_) => new sourcesScreen.SourcesScreen(
+                                builder: (_) => new SourcesScreen.SourcesScreen(
                                     sourceId: sources['sources'][index]['id'],
                                     sourceName: sources['sources'][index]
                                         ['name'])));

@@ -72,7 +72,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
 
   pushArticle(article) {
     articleDatabaseReference.push().set({
-      'author': article['author'],
+      'source': article["source"]["name"],
       'description': article['description'],
       'publishedAt': article['publishedAt'],
       'title': article['title'],
