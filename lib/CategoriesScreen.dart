@@ -8,6 +8,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import './SourcesScreen.dart' as SourcesScreen;
 import './globalStore.dart' as globalStore;
+import './categoriesList.dart' as categoriesList;
 
 class CategoriesScreen extends StatefulWidget {
   CategoriesScreen({Key key}) : super(key: key);
@@ -17,38 +18,16 @@ class CategoriesScreen extends StatefulWidget {
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
-  DataSnapshot snapshot;
-  var sources;
-  bool change = false;
-  final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
-
-  Future getData() async {
-    var libSources = await http.get(
-        Uri.encodeFull('https://newsapi.org/v2/sources?language=en'),
-        headers: {
-          "Accept": "application/json",
-          "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
-        });
-
-    var snap = await globalStore.articleSourcesDatabaseReference.once();
-    this.setState(() {
-      sources = JSON.decode(libSources.body);
-      snapshot = snap;
-    });
-    return "Success!";
-  }
-
   @override
   void initState() {
     super.initState();
-    this.getData();
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       backgroundColor: Colors.grey[200],
-      body: globalStore.categories == null
+      body: categoriesList.list == null
           ? const Center(
               child: const CupertinoActivityIndicator(),
             )
@@ -56,7 +35,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3, mainAxisSpacing: 25.0),
               padding: const EdgeInsets.all(10.0),
-              itemCount: globalStore.categories.length,
+              itemCount: categoriesList.list.length,
               itemBuilder: (BuildContext context, int index) {
                 return new GridTile(
                   footer: new Row(
@@ -67,7 +46,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             height: 16.0,
                             width: 100.0,
                             child: new Text(
-                              globalStore.categories[index]["name"],
+                              categoriesList.list[index]["name"],
                               maxLines: 2,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
@@ -77,7 +56,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       ]),
                   child: new Container(
                     height: 500.0,
-                    padding: const EdgeInsets.only(bottom: 5.0),
                     child: new GestureDetector(
                       child: new Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -95,13 +73,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                           backgroundColor: Colors.white,
                                           radius: 40.0,
                                           child: new Icon(
-                                              globalStore.categories[index]
+                                              categoriesList.list[index]
                                                   ["icon"],
-                                              size: 50.0,
-                                              color: Colors.blueGrey),
+                                              size: 40.0,
+                                              color: categoriesList.list[index]
+                                                  ["color"]),
                                         ),
                                         padding: const EdgeInsets.only(
-                                            left: 10.0, top: 10.0, right: 10.0),
+                                            left: 10.0, right: 10.0),
                                       ),
                                     ),
                                   ],
@@ -116,9 +95,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             context,
                             new MaterialPageRoute(
                                 builder: (_) => new SourcesScreen.SourcesScreen(
-                                      sourceId: globalStore.categories[index]
+                                      sourceId: categoriesList.list[index]
                                           ['id'],
-                                      sourceName: globalStore.categories[index]
+                                      sourceName: categoriesList.list[index]
                                           ["name"],
                                       isCategory: true,
                                     )));

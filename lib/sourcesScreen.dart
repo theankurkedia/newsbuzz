@@ -80,11 +80,9 @@ class _SourcesScreenState extends State<SourcesScreen> {
       if (value != null) {
         value.forEach((k, v) {
           if (v['url'].compareTo(article['url']) == 0) flag = 1;
+          return;
         });
-        if (flag == 1)
-          return true;
-        else
-          return false;
+        if (flag == 1) return true;
       }
     }
     return false;
@@ -161,96 +159,115 @@ class _SourcesScreenState extends State<SourcesScreen> {
             ? const Center(
                 child: const CupertinoActivityIndicator(),
               )
-            : new ListView.builder(
-                itemCount: data == null ? 0 : data["articles"].length,
-                itemBuilder: (BuildContext context, int index) {
-                  return new GestureDetector(
-                    child: new Card(
-                      child: new Row(
-                        children: [
-                          new Expanded(
-                            child: new GestureDetector(
-                              child: new Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  new Text(
-                                    data["articles"][index]["title"],
-                                    style: new TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+            : data["articles"].length != 0
+                ? new ListView.builder(
+                    itemCount: data == null ? 0 : data["articles"].length,
+                    padding: new EdgeInsets.all(2.0),
+                    itemBuilder: (BuildContext context, int index) {
+                      return new GestureDetector(
+                        child: new Card(
+                          child: new Row(
+                            children: [
+                              new Expanded(
+                                child: new GestureDetector(
+                                  child: new Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      new Text(
+                                        data["articles"][index]["title"],
+                                        style: new TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      new Text(
+                                        data["articles"][index]["description"],
+                                        style: new TextStyle(
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      new Text(
+                                        "Published " +
+                                            timeAgo(DateTime.parse(
+                                                data["articles"][index]
+                                                    ["publishedAt"])),
+                                        style: new TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.grey[800],
+                                        ),
+                                      ),
+                                      new Padding(
+                                        padding: new EdgeInsets.all(5.0),
+                                        child: new Text(
+                                          "Source: ${ data["articles"][index]["source"]["name"]}",
+                                          style: new TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  new Text(
-                                    data["articles"][index]["description"],
-                                    style: new TextStyle(
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  new Text(
-                                    "Published " +
-                                        timeAgo(DateTime.parse(data["articles"]
-                                            [index]["publishedAt"])),
-                                    style: new TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.grey[800],
+                                  onTap: () {
+                                    flutterWebviewPlugin.launch(
+                                        data["articles"][index]["url"],
+                                        fullScreen: false);
+                                  },
+                                ),
+                              ),
+                              new Column(
+                                children: <Widget>[
+                                  new SizedBox(
+                                    height: 100.0,
+                                    width: 100.0,
+                                    child: new Image.network(
+                                      data["articles"][index]["urlToImage"],
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
                                   new Row(
                                     children: <Widget>[
-                                      new Text(
-                                        "Source: ${ data["articles"][index]["source"]["name"]}",
-                                        style: new TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black,
-                                        ),
-                                      )
+                                      new GestureDetector(
+                                        child: buildButtonColumn(Icons.share),
+                                        onTap: () {
+                                          share(data["articles"][index]["url"]);
+                                        },
+                                      ),
+                                      new GestureDetector(
+                                        child: _hasArticle(
+                                                data["articles"][index])
+                                            ? buildButtonColumn(Icons.bookmark)
+                                            : buildButtonColumn(
+                                                Icons.bookmark_border),
+                                        onTap: () {
+                                          _onBookmarkTap(
+                                              data["articles"][index]);
+                                        },
+                                      ),
                                     ],
-                                  ),
-                                ],
-                              ),
-                              onTap: () {
-                                flutterWebviewPlugin.launch(
-                                    data["articles"][index]["url"],
-                                    fullScreen: false);
-                              },
-                            ),
-                          ),
-                          new Column(
-                            children: <Widget>[
-                              new SizedBox(
-                                height: 100.0,
-                                width: 100.0,
-                                child: new Image.network(
-                                  data["articles"][index]["urlToImage"],
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              new Row(
-                                children: <Widget>[
-                                  new GestureDetector(
-                                    child: buildButtonColumn(Icons.share),
-                                    onTap: () {
-                                      share(data["articles"][index]["url"]);
-                                    },
-                                  ),
-                                  new GestureDetector(
-                                    child: _hasArticle(data["articles"][index])
-                                        ? buildButtonColumn(Icons.bookmark)
-                                        : buildButtonColumn(
-                                            Icons.bookmark_border),
-                                    onTap: () {
-                                      _onBookmarkTap(data["articles"][index]);
-                                    },
-                                  ),
+                                  )
                                 ],
                               )
                             ],
-                          )
-                        ],
-                      ),
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : new Center(
+                    child: new Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        new Icon(Icons.chrome_reader_mode,
+                            color: Colors.grey, size: 60.0),
+                        new Text(
+                          "No articles saved",
+                          style:
+                              new TextStyle(fontSize: 24.0, color: Colors.grey),
+                        ),
+                      ],
                     ),
-                  );
-                },
-              ),
+                  ),
         onVerticalDragDown: _refresh(),
       ),
     );

@@ -1,7 +1,4 @@
-library news.globals;
-
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -39,24 +36,3 @@ Future<Null> _ensureLoggedIn() async {
 }
 
 var logIn = _ensureLoggedIn();
-
-List categories = [
-  {"id": "business", "name": "Business", "icon": Icons.work},
-  {"id": "technology", "name": "Technology", "icon": Icons.smartphone},
-  {
-    "id": "science-and-nature",
-    "name": "Science and Nature",
-    "icon": Icons.nature_people
-  },
-  {"id": "sport", "name": "Sports", "icon": Icons.directions_bike},
-  {"id": "entertainment", "name": "Entertainment", "icon": Icons.local_movies},
-  {"id": "gaming", "name": "Gaming", "icon": Icons.videogame_asset},
-  {"id": "general", "name": "General", "icon": Icons.people},
-  {
-    "id": "health-and-medical",
-    "name": "Health and Medical",
-    "icon": Icons.local_hospital
-  },
-  {"id": "music", "name": "Music", "icon": Icons.music_note},
-  {"id": "politics", "name": "Politics", "icon": Icons.assistant_photo}
-];

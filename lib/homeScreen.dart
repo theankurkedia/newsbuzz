@@ -19,9 +19,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   var data;
-  var user;
-  bool change = false;
-  var newsSelection = "bbc-news";
+  var newsSelection = "techcrunch";
   DataSnapshot snapshot;
   var snapSources;
   TimeAgo ta = new TimeAgo();
@@ -44,9 +42,15 @@ class _HomeScreenState extends State<HomeScreen> {
           "Accept": "application/json",
           "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
         });
-
+    var localData = JSON.decode(response.body);
+    if (localData != null && localData["articles"] != null) {
+      localData["articles"].sort((a, b) =>
+          a["publishedAt"] != null && b["publishedAt"] != null
+              ? b["publishedAt"].compareTo(a["publishedAt"])
+              : null);
+    }
     this.setState(() {
-      data = JSON.decode(response.body);
+      data = localData;
       snapshot = snap;
     });
     return "Success!";
@@ -60,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
         value.forEach((k, v) {
           if (v['url'].compareTo(article['url']) == 0) {
             flag = 1;
-            return true;
+            return;
           }
         });
         if (flag == 1) return true;
@@ -105,26 +109,29 @@ class _HomeScreenState extends State<HomeScreen> {
       pushArticle(article);
     }
     this.getData();
-    this.setState(() {
-      change = true;
-    });
   }
 
-  _onRemoveSource(id) {
+  _onRemoveSource(id, name) {
     if (snapSources != null) {
       snapSources.value.forEach((key, source) {
         if (source['id'].compareTo(id) == 0) {
           Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('News source removed'),
+                content: new Text('Are you sure you want to remove $name?'),
                 backgroundColor: Colors.grey[600],
+                duration: new Duration(seconds: 3),
+                action: new SnackBarAction(
+                    label: 'Yes',
+                    onPressed: () {
+                      globalStore.articleSourcesDatabaseReference
+                          .child(key)
+                          .remove();
+                      Scaffold.of(context).showSnackBar(
+                          new SnackBar(content: new Text('$name removed')));
+                    }),
               ));
-          globalStore.articleSourcesDatabaseReference.child(key).remove();
         }
       });
       this.getData();
-      this.setState(() {
-        change = true;
-      });
     }
   }
 
@@ -150,7 +157,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Column buildButtonColumn(IconData icon) {
     Color color = Theme.of(context).primaryColor;
-
     return new Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -162,12 +168,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (data != null && data["articles"] != null) {
-      data["articles"].sort((a, b) =>
-          a["publishedAt"] != null && b["publishedAt"] != null
-              ? b["publishedAt"].compareTo(a["publishedAt"])
-              : null);
-    }
     return new Scaffold(
       backgroundColor: Colors.grey[200],
       body: new GestureDetector(
@@ -288,8 +288,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                             child: buildButtonColumn(
                                                 Icons.not_interested)),
                                         onTap: () {
-                                          _onRemoveSource(data["articles"]
-                                              [index]["source"]["id"]);
+                                          _onRemoveSource(
+                                              data["articles"][index]["source"]
+                                                  ["id"],
+                                              data["articles"][index]["source"]
+                                                  ["name"]);
                                         },
                                       ),
                                     ],

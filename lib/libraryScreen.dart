@@ -145,13 +145,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                     new SizedBox(
                                       child: new Container(
                                         child: new CircleAvatar(
-                                          backgroundColor: Colors.white,
+                                          backgroundColor: Colors.transparent,
                                           backgroundImage: new NetworkImage(
-                                            "https://icons.better-idea.org/icon?url=" +
-                                                sources['sources'][index]
-                                                    ['url'] +
-                                                "&size=120",
-                                          ),
+                                              "https://icons.better-idea.org/icon?url=" +
+                                                  sources['sources'][index]
+                                                      ['url'] +
+                                                  "&size=120"),
                                           radius: 40.0,
                                         ),
                                         padding: const EdgeInsets.only(

@@ -61,11 +61,9 @@ class _SearchScreenState extends State<SearchScreen> {
       if (value != null) {
         value.forEach((k, v) {
           if (v['url'].compareTo(article['url']) == 0) flag = 1;
+          return;
         });
-        if (flag == 1)
-          return true;
-        else
-          return false;
+        if (flag == 1) return true;
       }
     }
     return false;

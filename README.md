@@ -1,8 +1,9 @@
-# newsapp
+# News Buzz
 
-A new Flutter project.
+News App created using Flutter.
 
-## Getting Started
-
-For help getting started with Flutter, view our online
-[documentation](http://flutter.io/).
+###features
+Custom news feed based on selected sources
+Search for topics
+Adding articles to bookmarks
+Sharing articles
