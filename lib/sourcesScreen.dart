@@ -7,24 +7,32 @@ import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:timeago/timeago.dart';
 import './globalStore.dart' as globalStore;
 
 class SourcesScreen extends StatefulWidget {
   SourcesScreen(
-      {Key key, this.sourceId = "techcrunch", this.sourceName = "TechCrunch"})
+      {Key key,
+      this.sourceId = "techcrunch",
+      this.sourceName = "TechCrunch",
+      this.isCategory: false})
       : super(key: key);
   final sourceId;
   final sourceName;
+  bool isCategory;
   @override
   _SourcesScreenState createState() => new _SourcesScreenState(
-      sourceId: this.sourceId, sourceName: this.sourceName);
+      sourceId: this.sourceId,
+      sourceName: this.sourceName,
+      isCategory: this.isCategory);
 }
 
 class _SourcesScreenState extends State<SourcesScreen> {
-  _SourcesScreenState({this.sourceId, this.sourceName});
+  _SourcesScreenState({this.sourceId, this.sourceName, this.isCategory});
   var data;
   final sourceId;
   final sourceName;
+  bool isCategory;
   bool change = false;
   DataSnapshot snapshot;
   final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
@@ -34,14 +42,26 @@ class _SourcesScreenState extends State<SourcesScreen> {
   var articleDatabaseReference;
 
   Future getData() async {
-    var response = await http.get(
-        Uri.encodeFull(
-            'https://newsapi.org/v2/top-headlines?sources=' + sourceId),
-        headers: {
-          "Accept": "application/json",
-          "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
-        });
+    var response;
 
+    if (isCategory) {
+      response = await http.get(
+          Uri.encodeFull('https://newsapi.org/v2/top-headlines?category=' +
+              sourceId +
+              '&language=en'),
+          headers: {
+            "Accept": "application/json",
+            "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
+          });
+    } else {
+      response = await http.get(
+          Uri.encodeFull(
+              'https://newsapi.org/v2/top-headlines?sources=' + sourceId),
+          headers: {
+            "Accept": "application/json",
+            "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
+          });
+    }
     userDatabaseReference = databaseReference.child(globalStore.userId);
     articleDatabaseReference = userDatabaseReference.child('articles');
     var snap = await articleDatabaseReference.once();
@@ -142,7 +162,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
                 child: const CupertinoActivityIndicator(),
               )
             : new ListView.builder(
-                itemCount: data == null ? 0 : data.length,
+                itemCount: data == null ? 0 : data["articles"].length,
                 itemBuilder: (BuildContext context, int index) {
                   return new GestureDetector(
                     child: new Card(
@@ -163,6 +183,15 @@ class _SourcesScreenState extends State<SourcesScreen> {
                                     data["articles"][index]["description"],
                                     style: new TextStyle(
                                       color: Colors.black,
+                                    ),
+                                  ),
+                                  new Text(
+                                    "Published " +
+                                        timeAgo(DateTime.parse(data["articles"]
+                                            [index]["publishedAt"])),
+                                    style: new TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.grey[800],
                                     ),
                                   ),
                                   new Row(

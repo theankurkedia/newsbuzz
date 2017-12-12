@@ -9,14 +9,14 @@ import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import './SourcesScreen.dart' as SourcesScreen;
 import './globalStore.dart' as globalStore;
 
-class LibraryScreen extends StatefulWidget {
-  LibraryScreen({Key key}) : super(key: key);
+class CategoriesScreen extends StatefulWidget {
+  CategoriesScreen({Key key}) : super(key: key);
 
   @override
-  _LibraryScreenState createState() => new _LibraryScreenState();
+  _CategoriesScreenState createState() => new _CategoriesScreenState();
 }
 
-class _LibraryScreenState extends State<LibraryScreen> {
+class _CategoriesScreenState extends State<CategoriesScreen> {
   DataSnapshot snapshot;
   var sources;
   bool change = false;
@@ -38,59 +38,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
     return "Success!";
   }
 
-  _hasSource(id) {
-    if (snapshot.value != null) {
-      var value = snapshot.value;
-      int flag = 0;
-      if (value != null) {
-        value.forEach((k, v) {
-          if (v['id'].compareTo(id) == 0) {
-            flag = 1;
-          }
-        });
-        if (flag == 1) return true;
-      }
-    }
-    return false;
-  }
-
-  pushSource(name, id) {
-    globalStore.articleSourcesDatabaseReference.push().set({
-      'name': name,
-      'id': id,
-    });
-  }
-
-  _onAddTap(name, id) {
-    if (snapshot.value != null) {
-      var value = snapshot.value;
-      int flag = 0;
-      value.forEach((k, v) {
-        if (v['id'].compareTo(id) == 0) {
-          flag = 1;
-          Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('News source removed'),
-                backgroundColor: Colors.grey[600],
-              ));
-          globalStore.articleSourcesDatabaseReference.child(k).remove();
-        }
-      });
-      if (flag != 1) {
-        Scaffold.of(context).showSnackBar(new SnackBar(
-              content: new Text('News source added'),
-              backgroundColor: Colors.grey[600],
-            ));
-        pushSource(name, id);
-      }
-    } else {
-      pushSource(name, id);
-    }
-    this.getData();
-    this.setState(() {
-      change = true;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
@@ -101,7 +48,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   Widget build(BuildContext context) {
     return new Scaffold(
       backgroundColor: Colors.grey[200],
-      body: sources == null
+      body: globalStore.categories == null
           ? const Center(
               child: const CupertinoActivityIndicator(),
             )
@@ -109,7 +56,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3, mainAxisSpacing: 25.0),
               padding: const EdgeInsets.all(10.0),
-              itemCount: sources == null ? 0 : sources['sources'].length,
+              itemCount: globalStore.categories.length,
               itemBuilder: (BuildContext context, int index) {
                 return new GridTile(
                   footer: new Row(
@@ -120,7 +67,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                             height: 16.0,
                             width: 100.0,
                             child: new Text(
-                              sources['sources'][index]['name'],
+                              globalStore.categories[index]["name"],
                               maxLines: 2,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
@@ -146,31 +93,15 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                       child: new Container(
                                         child: new CircleAvatar(
                                           backgroundColor: Colors.white,
-                                          backgroundImage: new NetworkImage(
-                                            "https://icons.better-idea.org/icon?url=" +
-                                                sources['sources'][index]
-                                                    ['url'] +
-                                                "&size=120",
-                                          ),
                                           radius: 40.0,
+                                          child: new Icon(
+                                              globalStore.categories[index]
+                                                  ["icon"],
+                                              size: 50.0,
+                                              color: Colors.blueGrey),
                                         ),
                                         padding: const EdgeInsets.only(
-                                            left: 10.0, top: 20.0, right: 10.0),
-                                      ),
-                                    ),
-                                    new Positioned(
-                                      right: 0.0,
-                                      child: new GestureDetector(
-                                        child: _hasSource(
-                                                sources['sources'][index]['id'])
-                                            ? new Icon(Icons.check_circle)
-                                            : new Icon(
-                                                Icons.add_circle_outline),
-                                        onTap: () {
-                                          _onAddTap(
-                                              sources['sources'][index]['name'],
-                                              sources['sources'][index]['id']);
-                                        },
+                                            left: 10.0, top: 10.0, right: 10.0),
                                       ),
                                     ),
                                   ],
@@ -185,10 +116,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
                             context,
                             new MaterialPageRoute(
                                 builder: (_) => new SourcesScreen.SourcesScreen(
-                                      sourceId: sources['sources'][index]['id'],
-                                      sourceName: sources['sources'][index]
-                                          ['name'],
-                                      isCategory: false,
+                                      sourceId: globalStore.categories[index]
+                                          ['id'],
+                                      sourceName: globalStore.categories[index]
+                                          ["name"],
+                                      isCategory: true,
                                     )));
                       },
                     ),

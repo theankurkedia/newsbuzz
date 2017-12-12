@@ -5,6 +5,7 @@ import 'package:share/share.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
+import 'package:timeago/timeago.dart';
 import './globalStore.dart' as globalStore;
 
 class BookmarksScreen extends StatefulWidget {
@@ -74,7 +75,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                     child: new FirebaseAnimatedList(
                   query: globalStore.articleDatabaseReference,
                   sort: (a, b) => b.key.compareTo(a.key),
-                  padding: new EdgeInsets.all(8.0),
+                  padding: new EdgeInsets.all(2.0),
                   itemBuilder: (_, DataSnapshot snapshot,
                       Animation<double> animation, int index) {
                     return new GestureDetector(
@@ -96,6 +97,15 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                                       snapshot.value["description"],
                                       style: new TextStyle(
                                         color: Colors.grey[500],
+                                      ),
+                                    ),
+                                    new Text(
+                                      "Published " +
+                                          timeAgo(DateTime.parse(
+                                              snapshot.value["publishedAt"])),
+                                      style: new TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.grey[800],
                                       ),
                                     ),
                                     new Padding(

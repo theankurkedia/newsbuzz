@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:timeago/timeago.dart';
 import './globalStore.dart' as globalStore;
 import './SearchScreen.dart' as SearchScreen;
 
@@ -22,11 +23,13 @@ class _HomeScreenState extends State<HomeScreen> {
   bool change = false;
   var newsSelection = "bbc-news";
   DataSnapshot snapshot;
+  var snapSources;
+  TimeAgo ta = new TimeAgo();
   final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
   final TextEditingController _controller = new TextEditingController();
   Future getData() async {
     await globalStore.logIn;
-    var snapSources = await globalStore.articleSourcesDatabaseReference.once();
+    snapSources = await globalStore.articleSourcesDatabaseReference.once();
     var snap = await globalStore.articleDatabaseReference.once();
     if (snapSources.value != null) {
       newsSelection = '';
@@ -107,6 +110,24 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  _onRemoveSource(id) {
+    if (snapSources != null) {
+      snapSources.value.forEach((key, source) {
+        if (source['id'].compareTo(id) == 0) {
+          Scaffold.of(context).showSnackBar(new SnackBar(
+                content: new Text('News source removed'),
+                backgroundColor: Colors.grey[600],
+              ));
+          globalStore.articleSourcesDatabaseReference.child(key).remove();
+        }
+      });
+      this.getData();
+      this.setState(() {
+        change = true;
+      });
+    }
+  }
+
   _refresh() {
     this.getData();
   }
@@ -151,11 +172,20 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.grey[200],
       body: new GestureDetector(
         child: new Column(children: <Widget>[
-          new TextField(
-            controller: _controller,
-            onSubmitted: handleTextInputSubmit,
-            decoration: new InputDecoration(
-                hintText: 'Finding Something?', icon: new Icon(Icons.search)),
+          new Padding(
+            padding: new EdgeInsets.all(4.0),
+            child: new Container(
+              decoration: new BoxDecoration(
+                color: Colors.white,
+              ),
+              child: new TextField(
+                controller: _controller,
+                onSubmitted: handleTextInputSubmit,
+                decoration: new InputDecoration(
+                    hintText: 'Finding Something?',
+                    icon: new Icon(Icons.search)),
+              ),
+            ),
           ),
           new Expanded(
             child: data == null
@@ -164,6 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   )
                 : new ListView.builder(
                     itemCount: data == null ? 0 : data["articles"].length,
+                    padding: new EdgeInsets.all(2.0),
                     itemBuilder: (BuildContext context, int index) {
                       return new GestureDetector(
                         child: new Card(
@@ -184,21 +215,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                       new Text(
                                         data["articles"][index]["description"],
                                         style: new TextStyle(
-                                          color: Colors.black,
+                                          color: Colors.grey[500],
                                         ),
                                       ),
-                                      new Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: <Widget>[
-                                          new Text(
-                                            "Source: ${ data["articles"][index]["source"]["name"]}",
-                                            style: new TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.black,
-                                            ),
+                                      new Text(
+                                        "Published " +
+                                            timeAgo(DateTime.parse(
+                                                data["articles"][index]
+                                                    ["publishedAt"])),
+                                        style: new TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.grey[800],
+                                        ),
+                                      ),
+                                      new Padding(
+                                        padding: new EdgeInsets.all(5.0),
+                                        child: new Text(
+                                          "Source: ${ data["articles"][index]["source"]["name"]}",
+                                          style: new TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black,
                                           ),
-                                        ],
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -222,24 +260,40 @@ class _HomeScreenState extends State<HomeScreen> {
                                   new Row(
                                     children: <Widget>[
                                       new GestureDetector(
-                                        child: buildButtonColumn(Icons.share),
+                                        child: new Padding(
+                                            padding: new EdgeInsets.all(5.0),
+                                            child:
+                                                buildButtonColumn(Icons.share)),
                                         onTap: () {
                                           share(data["articles"][index]["url"]);
                                         },
                                       ),
                                       new GestureDetector(
-                                        child: _hasArticle(
-                                                data["articles"][index])
-                                            ? buildButtonColumn(Icons.bookmark)
-                                            : buildButtonColumn(
-                                                Icons.bookmark_border),
+                                        child: new Padding(
+                                            padding: new EdgeInsets.all(5.0),
+                                            child: _hasArticle(
+                                                    data["articles"][index])
+                                                ? buildButtonColumn(
+                                                    Icons.bookmark)
+                                                : buildButtonColumn(
+                                                    Icons.bookmark_border)),
                                         onTap: () {
                                           _onBookmarkTap(
                                               data["articles"][index]);
                                         },
                                       ),
+                                      new GestureDetector(
+                                        child: new Padding(
+                                            padding: new EdgeInsets.all(5.0),
+                                            child: buildButtonColumn(
+                                                Icons.not_interested)),
+                                        onTap: () {
+                                          _onRemoveSource(data["articles"]
+                                              [index]["source"]["id"]);
+                                        },
+                                      ),
                                     ],
-                                  )
+                                  ),
                                 ],
                               )
                             ],

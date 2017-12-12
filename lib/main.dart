@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import './HomeScreen.dart' as HomeScreeen;
-import './BookmarkScreen.dart' as BookmarkScreen;
 import './LibraryScreen.dart' as LibraryScreen;
+import './CategoriesScreen.dart' as CategoriesScreen;
+import './BookmarkScreen.dart' as BookmarkScreen;
 import './globalStore.dart' as globalStore;
 
 void main() {
@@ -24,7 +25,7 @@ class NewsAppState extends State<NewsApp> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     this.ensureLogIn();
-    controller = new TabController(vsync: this, length: 3);
+    controller = new TabController(vsync: this, length: 4);
   }
 
   @override
@@ -44,11 +45,13 @@ class NewsAppState extends State<NewsApp> with SingleTickerProviderStateMixin {
             child: new TabBar(controller: controller, tabs: <Tab>[
               new Tab(icon: new Icon(Icons.view_headline)),
               new Tab(icon: new Icon(Icons.view_module)),
+              new Tab(icon: new Icon(Icons.explore)),
               new Tab(icon: new Icon(Icons.bookmark)),
             ])),
         body: new TabBarView(controller: controller, children: <Widget>[
           new HomeScreeen.HomeScreen(),
           new LibraryScreen.LibraryScreen(),
+          new CategoriesScreen.CategoriesScreen(),
           new BookmarkScreen.BookmarksScreen(),
         ]));
   }

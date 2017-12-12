@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:timeago/timeago.dart';
 import './globalStore.dart' as globalStore;
 
 class SearchScreen extends StatefulWidget {
@@ -170,6 +171,16 @@ class _SearchScreenState extends State<SearchScreen> {
                                         data["articles"][index]["description"],
                                         style: new TextStyle(
                                           color: Colors.black,
+                                        ),
+                                      ),
+                                      new Text(
+                                        "Published " +
+                                            timeAgo(DateTime.parse(
+                                                data["articles"][index]
+                                                    ["publishedAt"])),
+                                        style: new TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.grey[800],
                                         ),
                                       ),
                                       new Row(
