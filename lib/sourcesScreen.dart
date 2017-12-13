@@ -108,7 +108,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
           flag = 1;
           articleDatabaseReference.child(k).remove();
           Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('Bookmark removed'),
+                content: new Text('Article removed'),
                 backgroundColor: Colors.grey[600],
               ));
         }
@@ -116,7 +116,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
       if (flag != 1) {
         pushArticle(article);
         Scaffold.of(context).showSnackBar(new SnackBar(
-              content: new Text('Bookmark added'),
+              content: new Text('Article added'),
               backgroundColor: Colors.grey[600],
             ));
       }

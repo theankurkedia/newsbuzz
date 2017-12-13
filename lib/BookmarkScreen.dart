@@ -41,7 +41,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         if (v['url'].compareTo(article['url']) == 0) {
           globalStore.articleDatabaseReference.child(k).remove();
           Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('Bookmark removed'),
+                content: new Text('Article removed'),
                 backgroundColor: Colors.grey[600],
               ));
         }

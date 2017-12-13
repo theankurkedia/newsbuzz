@@ -93,14 +93,14 @@ class _HomeScreenState extends State<HomeScreen> {
           flag = 1;
           globalStore.articleDatabaseReference.child(k).remove();
           Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('Bookmark removed'),
+                content: new Text('Article removed'),
                 backgroundColor: Colors.grey[600],
               ));
         }
       });
       if (flag != 1) {
         Scaffold.of(context).showSnackBar(new SnackBar(
-              content: new Text('Bookmark added'),
+              content: new Text('Article saved'),
               backgroundColor: Colors.grey[600],
             ));
         pushArticle(article);
