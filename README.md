@@ -12,4 +12,4 @@ News App created using Flutter.
 
 ## Preview
 
-![ios-demo]("./screenshots/NewsBuzz.gif")
+![ios-demo](./screenshots/NewsBuzz.gif)
