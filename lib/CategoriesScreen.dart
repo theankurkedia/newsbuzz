@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
-import './SourcesScreen.dart' as SourcesScreen;
+import './SourcesListScreen.dart' as SourcesListScreen;
 import './globalStore.dart' as globalStore;
 import './categoriesList.dart' as categoriesList;
 
@@ -94,7 +94,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                         Navigator.push(
                             context,
                             new MaterialPageRoute(
-                                builder: (_) => new SourcesScreen.SourcesScreen(
+                                builder: (_) =>
+                                    new SourcesListScreen.SourcesListScreen(
                                       sourceId: categoriesList.list[index]
                                           ['id'],
                                       sourceName: categoriesList.list[index]

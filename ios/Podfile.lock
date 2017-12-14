@@ -89,7 +89,7 @@ DEPENDENCIES:
   - firebase_database (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/firebase_database-0.1.4/ios`)
   - firebase_storage (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/firebase_storage-0.0.7/ios`)
   - Flutter (from `/Users/ankurkedia/flutter/bin/cache/artifacts/engine/ios`)
-  - flutter_webview_plugin (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/flutter_webview_plugin-0.0.9/ios`)
+  - flutter_webview_plugin (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/flutter_webview_plugin-0.0.9+1/ios`)
   - google_sign_in (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/google_sign_in-0.3.1/ios`)
   - share (from `/Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/share-0.2.2/ios`)
 
@@ -105,7 +105,7 @@ EXTERNAL SOURCES:
   Flutter:
     :path: /Users/ankurkedia/flutter/bin/cache/artifacts/engine/ios
   flutter_webview_plugin:
-    :path: /Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/flutter_webview_plugin-0.0.9/ios
+    :path: /Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/flutter_webview_plugin-0.0.9+1/ios
   google_sign_in:
     :path: /Users/ankurkedia/.pub-cache/hosted/pub.dartlang.org/google_sign_in-0.3.1/ios
   share:

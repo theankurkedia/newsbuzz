@@ -2,74 +2,57 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:timeago/timeago.dart';
 import './globalStore.dart' as globalStore;
+import './SearchScreen.dart' as SearchScreen;
 
-class SourcesScreen extends StatefulWidget {
-  SourcesScreen(
-      {Key key,
-      this.sourceId = "techcrunch",
-      this.sourceName = "TechCrunch",
-      this.isCategory: false})
-      : super(key: key);
-  final sourceId;
-  final sourceName;
-  bool isCategory;
+class HomeScreen extends StatefulWidget {
+  HomeScreen({Key key}) : super(key: key);
+
   @override
-  _SourcesScreenState createState() => new _SourcesScreenState(
-      sourceId: this.sourceId,
-      sourceName: this.sourceName,
-      isCategory: this.isCategory);
+  _HomeScreenState createState() => new _HomeScreenState();
 }
 
-class _SourcesScreenState extends State<SourcesScreen> {
-  _SourcesScreenState({this.sourceId, this.sourceName, this.isCategory});
+class _HomeScreenState extends State<HomeScreen> {
   var data;
-  final sourceId;
-  final sourceName;
-  bool isCategory;
-  bool change = false;
+  var newsSelection = "techcrunch";
   DataSnapshot snapshot;
+  var snapSources;
+  TimeAgo ta = new TimeAgo();
   final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
-  final auth = FirebaseAuth.instance;
-  final databaseReference = FirebaseDatabase.instance.reference();
-  var userDatabaseReference;
-  var articleDatabaseReference;
-
+  final TextEditingController _controller = new TextEditingController();
   Future getData() async {
-    var response;
-
-    if (isCategory) {
-      response = await http.get(
-          Uri.encodeFull('https://newsapi.org/v2/top-headlines?category=' +
-              sourceId +
-              '&language=en'),
-          headers: {
-            "Accept": "application/json",
-            "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
-          });
-    } else {
-      response = await http.get(
-          Uri.encodeFull(
-              'https://newsapi.org/v2/top-headlines?sources=' + sourceId),
-          headers: {
-            "Accept": "application/json",
-            "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
-          });
+    await globalStore.logIn;
+    snapSources = await globalStore.articleSourcesDatabaseReference.once();
+    var snap = await globalStore.articleDatabaseReference.once();
+    if (snapSources.value != null) {
+      newsSelection = '';
+      snapSources.value.forEach((key, source) {
+        newsSelection = newsSelection + source['id'] + ',';
+      });
     }
-    userDatabaseReference = databaseReference.child(globalStore.userId);
-    articleDatabaseReference = userDatabaseReference.child('articles');
-    var snap = await articleDatabaseReference.once();
+    var response = await http.get(
+        Uri.encodeFull(
+            'https://newsapi.org/v2/top-headlines?sources=' + newsSelection),
+        headers: {
+          "Accept": "application/json",
+          "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
+        });
+    var localData = JSON.decode(response.body);
+    if (localData != null && localData["articles"] != null) {
+      localData["articles"].sort((a, b) =>
+          a["publishedAt"] != null && b["publishedAt"] != null
+              ? b["publishedAt"].compareTo(a["publishedAt"])
+              : null);
+    }
     this.setState(() {
-      data = JSON.decode(response.body);
+      data = localData;
       snapshot = snap;
     });
-
     return "Success!";
   }
 
@@ -79,8 +62,10 @@ class _SourcesScreenState extends State<SourcesScreen> {
       int flag = 0;
       if (value != null) {
         value.forEach((k, v) {
-          if (v['url'].compareTo(article['url']) == 0) flag = 1;
-          return;
+          if (v['url'].compareTo(article['url']) == 0) {
+            flag = 1;
+            return;
+          }
         });
         if (flag == 1) return true;
       }
@@ -89,7 +74,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
   }
 
   pushArticle(article) {
-    articleDatabaseReference.push().set({
+    globalStore.articleDatabaseReference.push().set({
       'source': article["source"]["name"],
       'description': article['description'],
       'publishedAt': article['publishedAt'],
@@ -106,7 +91,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
       value.forEach((k, v) {
         if (v['url'].compareTo(article['url']) == 0) {
           flag = 1;
-          articleDatabaseReference.child(k).remove();
+          globalStore.articleDatabaseReference.child(k).remove();
           Scaffold.of(context).showSnackBar(new SnackBar(
                 content: new Text('Article removed'),
                 backgroundColor: Colors.grey[600],
@@ -114,17 +99,40 @@ class _SourcesScreenState extends State<SourcesScreen> {
         }
       });
       if (flag != 1) {
-        pushArticle(article);
         Scaffold.of(context).showSnackBar(new SnackBar(
-              content: new Text('Article added'),
+              content: new Text('Article saved'),
               backgroundColor: Colors.grey[600],
             ));
+        pushArticle(article);
       }
-      this.setState(() {
-        change = true;
-      });
     } else {
       pushArticle(article);
+    }
+    this.getData();
+  }
+
+  _onRemoveSource(id, name) {
+    if (snapSources != null) {
+      snapSources.value.forEach((key, source) {
+        if (source['id'].compareTo(id) == 0) {
+          Scaffold.of(context).showSnackBar(new SnackBar(
+                content: new Text('Are you sure you want to remove $name?'),
+                backgroundColor: Colors.grey[600],
+                duration: new Duration(seconds: 3),
+                action: new SnackBarAction(
+                    label: 'Yes',
+                    onPressed: () {
+                      globalStore.articleSourcesDatabaseReference
+                          .child(key)
+                          .remove();
+                      Scaffold.of(context).showSnackBar(new SnackBar(
+                          content: new Text('$name removed'),
+                          backgroundColor: Colors.grey[600]));
+                    }),
+              ));
+        }
+      });
+      this.getData();
     }
   }
 
@@ -132,6 +140,17 @@ class _SourcesScreenState extends State<SourcesScreen> {
     this.getData();
   }
 
+  void handleTextInputSubmit(var input) {
+    if (input != '') {
+      Navigator.push(
+          context,
+          new MaterialPageRoute(
+              builder: (_) =>
+                  new SearchScreen.SearchScreen(searchQuery: input)));
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     this.getData();
@@ -139,7 +158,6 @@ class _SourcesScreenState extends State<SourcesScreen> {
 
   Column buildButtonColumn(IconData icon) {
     Color color = Theme.of(context).primaryColor;
-
     return new Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -152,15 +170,30 @@ class _SourcesScreenState extends State<SourcesScreen> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text(sourceName)),
       backgroundColor: Colors.grey[200],
       body: new GestureDetector(
-        child: data == null
-            ? const Center(
-                child: const CupertinoActivityIndicator(),
-              )
-            : data["articles"].length != 0
-                ? new ListView.builder(
+        child: new Column(children: <Widget>[
+          new Padding(
+            padding: new EdgeInsets.all(4.0),
+            child: new Container(
+              decoration: new BoxDecoration(
+                color: Colors.white,
+              ),
+              child: new TextField(
+                controller: _controller,
+                onSubmitted: handleTextInputSubmit,
+                decoration: new InputDecoration(
+                    hintText: 'Finding Something?',
+                    icon: new Icon(Icons.search)),
+              ),
+            ),
+          ),
+          new Expanded(
+            child: data == null
+                ? const Center(
+                    child: const CupertinoActivityIndicator(),
+                  )
+                : new ListView.builder(
                     itemCount: data == null ? 0 : data["articles"].length,
                     padding: new EdgeInsets.all(2.0),
                     itemBuilder: (BuildContext context, int index) {
@@ -183,7 +216,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
                                       new Text(
                                         data["articles"][index]["description"],
                                         style: new TextStyle(
-                                          color: Colors.black,
+                                          color: Colors.grey[500],
                                         ),
                                       ),
                                       new Text(
@@ -228,24 +261,43 @@ class _SourcesScreenState extends State<SourcesScreen> {
                                   new Row(
                                     children: <Widget>[
                                       new GestureDetector(
-                                        child: buildButtonColumn(Icons.share),
+                                        child: new Padding(
+                                            padding: new EdgeInsets.all(5.0),
+                                            child:
+                                                buildButtonColumn(Icons.share)),
                                         onTap: () {
                                           share(data["articles"][index]["url"]);
                                         },
                                       ),
                                       new GestureDetector(
-                                        child: _hasArticle(
-                                                data["articles"][index])
-                                            ? buildButtonColumn(Icons.bookmark)
-                                            : buildButtonColumn(
-                                                Icons.bookmark_border),
+                                        child: new Padding(
+                                            padding: new EdgeInsets.all(5.0),
+                                            child: _hasArticle(
+                                                    data["articles"][index])
+                                                ? buildButtonColumn(
+                                                    Icons.bookmark)
+                                                : buildButtonColumn(
+                                                    Icons.bookmark_border)),
                                         onTap: () {
                                           _onBookmarkTap(
                                               data["articles"][index]);
                                         },
                                       ),
+                                      new GestureDetector(
+                                        child: new Padding(
+                                            padding: new EdgeInsets.all(5.0),
+                                            child: buildButtonColumn(
+                                                Icons.not_interested)),
+                                        onTap: () {
+                                          _onRemoveSource(
+                                              data["articles"][index]["source"]
+                                                  ["id"],
+                                              data["articles"][index]["source"]
+                                                  ["name"]);
+                                        },
+                                      ),
                                     ],
-                                  )
+                                  ),
                                 ],
                               )
                             ],
@@ -253,25 +305,11 @@ class _SourcesScreenState extends State<SourcesScreen> {
                         ),
                       );
                     },
-                  )
-                : new Center(
-                    child: new Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        new Icon(Icons.chrome_reader_mode,
-                            color: Colors.grey, size: 60.0),
-                        new Text(
-                          "No articles saved",
-                          style:
-                              new TextStyle(fontSize: 24.0, color: Colors.grey),
-                        ),
-                      ],
-                    ),
                   ),
+          )
+        ]),
         onVerticalDragDown: _refresh(),
       ),
     );
   }
 }
-
-//merge homeScreen and eachNewScreen

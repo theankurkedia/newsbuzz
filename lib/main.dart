@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import './HomeScreen.dart' as HomeScreeen;
+import './HomeFeedScreen.dart' as HomeScreeen;
 import './LibraryScreen.dart' as LibraryScreen;
 import './CategoriesScreen.dart' as CategoriesScreen;
 import './BookmarkScreen.dart' as BookmarkScreen;

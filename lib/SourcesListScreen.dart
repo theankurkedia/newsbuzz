@@ -2,57 +2,74 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:timeago/timeago.dart';
 import './globalStore.dart' as globalStore;
-import './SearchScreen.dart' as SearchScreen;
 
-class HomeScreen extends StatefulWidget {
-  HomeScreen({Key key}) : super(key: key);
-
+class SourcesListScreen extends StatefulWidget {
+  SourcesListScreen(
+      {Key key,
+      this.sourceId = "techcrunch",
+      this.sourceName = "TechCrunch",
+      this.isCategory: false})
+      : super(key: key);
+  final sourceId;
+  final sourceName;
+  bool isCategory;
   @override
-  _HomeScreenState createState() => new _HomeScreenState();
+  _SourcesListScreenState createState() => new _SourcesListScreenState(
+      sourceId: this.sourceId,
+      sourceName: this.sourceName,
+      isCategory: this.isCategory);
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _SourcesListScreenState extends State<SourcesListScreen> {
+  _SourcesListScreenState({this.sourceId, this.sourceName, this.isCategory});
   var data;
-  var newsSelection = "techcrunch";
+  final sourceId;
+  final sourceName;
+  bool isCategory;
+  bool change = false;
   DataSnapshot snapshot;
-  var snapSources;
-  TimeAgo ta = new TimeAgo();
   final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
-  final TextEditingController _controller = new TextEditingController();
+  final auth = FirebaseAuth.instance;
+  final databaseReference = FirebaseDatabase.instance.reference();
+  var userDatabaseReference;
+  var articleDatabaseReference;
+
   Future getData() async {
-    await globalStore.logIn;
-    snapSources = await globalStore.articleSourcesDatabaseReference.once();
-    var snap = await globalStore.articleDatabaseReference.once();
-    if (snapSources.value != null) {
-      newsSelection = '';
-      snapSources.value.forEach((key, source) {
-        newsSelection = newsSelection + source['id'] + ',';
-      });
+    var response;
+
+    if (isCategory) {
+      response = await http.get(
+          Uri.encodeFull('https://newsapi.org/v2/top-headlines?category=' +
+              sourceId +
+              '&language=en'),
+          headers: {
+            "Accept": "application/json",
+            "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
+          });
+    } else {
+      response = await http.get(
+          Uri.encodeFull(
+              'https://newsapi.org/v2/top-headlines?sources=' + sourceId),
+          headers: {
+            "Accept": "application/json",
+            "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
+          });
     }
-    var response = await http.get(
-        Uri.encodeFull(
-            'https://newsapi.org/v2/top-headlines?sources=' + newsSelection),
-        headers: {
-          "Accept": "application/json",
-          "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
-        });
-    var localData = JSON.decode(response.body);
-    if (localData != null && localData["articles"] != null) {
-      localData["articles"].sort((a, b) =>
-          a["publishedAt"] != null && b["publishedAt"] != null
-              ? b["publishedAt"].compareTo(a["publishedAt"])
-              : null);
-    }
+    userDatabaseReference = databaseReference.child(globalStore.userId);
+    articleDatabaseReference = userDatabaseReference.child('articles');
+    var snap = await articleDatabaseReference.once();
     this.setState(() {
-      data = localData;
+      data = JSON.decode(response.body);
       snapshot = snap;
     });
+
     return "Success!";
   }
 
@@ -62,10 +79,8 @@ class _HomeScreenState extends State<HomeScreen> {
       int flag = 0;
       if (value != null) {
         value.forEach((k, v) {
-          if (v['url'].compareTo(article['url']) == 0) {
-            flag = 1;
-            return;
-          }
+          if (v['url'].compareTo(article['url']) == 0) flag = 1;
+          return;
         });
         if (flag == 1) return true;
       }
@@ -74,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   pushArticle(article) {
-    globalStore.articleDatabaseReference.push().set({
+    articleDatabaseReference.push().set({
       'source': article["source"]["name"],
       'description': article['description'],
       'publishedAt': article['publishedAt'],
@@ -91,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
       value.forEach((k, v) {
         if (v['url'].compareTo(article['url']) == 0) {
           flag = 1;
-          globalStore.articleDatabaseReference.child(k).remove();
+          articleDatabaseReference.child(k).remove();
           Scaffold.of(context).showSnackBar(new SnackBar(
                 content: new Text('Article removed'),
                 backgroundColor: Colors.grey[600],
@@ -99,39 +114,17 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       });
       if (flag != 1) {
+        pushArticle(article);
         Scaffold.of(context).showSnackBar(new SnackBar(
-              content: new Text('Article saved'),
+              content: new Text('Article added'),
               backgroundColor: Colors.grey[600],
             ));
-        pushArticle(article);
       }
+      this.setState(() {
+        change = true;
+      });
     } else {
       pushArticle(article);
-    }
-    this.getData();
-  }
-
-  _onRemoveSource(id, name) {
-    if (snapSources != null) {
-      snapSources.value.forEach((key, source) {
-        if (source['id'].compareTo(id) == 0) {
-          Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('Are you sure you want to remove $name?'),
-                backgroundColor: Colors.grey[600],
-                duration: new Duration(seconds: 3),
-                action: new SnackBarAction(
-                    label: 'Yes',
-                    onPressed: () {
-                      globalStore.articleSourcesDatabaseReference
-                          .child(key)
-                          .remove();
-                      Scaffold.of(context).showSnackBar(
-                          new SnackBar(content: new Text('$name removed')));
-                    }),
-              ));
-        }
-      });
-      this.getData();
     }
   }
 
@@ -139,17 +132,6 @@ class _HomeScreenState extends State<HomeScreen> {
     this.getData();
   }
 
-  void handleTextInputSubmit(var input) {
-    if (input != '') {
-      Navigator.push(
-          context,
-          new MaterialPageRoute(
-              builder: (_) =>
-                  new SearchScreen.SearchScreen(searchQuery: input)));
-    }
-  }
-
-  @override
   void initState() {
     super.initState();
     this.getData();
@@ -157,6 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Column buildButtonColumn(IconData icon) {
     Color color = Theme.of(context).primaryColor;
+
     return new Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -169,30 +152,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      appBar: new AppBar(title: new Text(sourceName)),
       backgroundColor: Colors.grey[200],
       body: new GestureDetector(
-        child: new Column(children: <Widget>[
-          new Padding(
-            padding: new EdgeInsets.all(4.0),
-            child: new Container(
-              decoration: new BoxDecoration(
-                color: Colors.white,
-              ),
-              child: new TextField(
-                controller: _controller,
-                onSubmitted: handleTextInputSubmit,
-                decoration: new InputDecoration(
-                    hintText: 'Finding Something?',
-                    icon: new Icon(Icons.search)),
-              ),
-            ),
-          ),
-          new Expanded(
-            child: data == null
-                ? const Center(
-                    child: const CupertinoActivityIndicator(),
-                  )
-                : new ListView.builder(
+        child: data == null
+            ? const Center(
+                child: const CupertinoActivityIndicator(),
+              )
+            : data["articles"].length != 0
+                ? new ListView.builder(
                     itemCount: data == null ? 0 : data["articles"].length,
                     padding: new EdgeInsets.all(2.0),
                     itemBuilder: (BuildContext context, int index) {
@@ -215,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       new Text(
                                         data["articles"][index]["description"],
                                         style: new TextStyle(
-                                          color: Colors.grey[500],
+                                          color: Colors.black,
                                         ),
                                       ),
                                       new Text(
@@ -260,43 +228,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                   new Row(
                                     children: <Widget>[
                                       new GestureDetector(
-                                        child: new Padding(
-                                            padding: new EdgeInsets.all(5.0),
-                                            child:
-                                                buildButtonColumn(Icons.share)),
+                                        child: buildButtonColumn(Icons.share),
                                         onTap: () {
                                           share(data["articles"][index]["url"]);
                                         },
                                       ),
                                       new GestureDetector(
-                                        child: new Padding(
-                                            padding: new EdgeInsets.all(5.0),
-                                            child: _hasArticle(
-                                                    data["articles"][index])
-                                                ? buildButtonColumn(
-                                                    Icons.bookmark)
-                                                : buildButtonColumn(
-                                                    Icons.bookmark_border)),
+                                        child: _hasArticle(
+                                                data["articles"][index])
+                                            ? buildButtonColumn(Icons.bookmark)
+                                            : buildButtonColumn(
+                                                Icons.bookmark_border),
                                         onTap: () {
                                           _onBookmarkTap(
                                               data["articles"][index]);
                                         },
                                       ),
-                                      new GestureDetector(
-                                        child: new Padding(
-                                            padding: new EdgeInsets.all(5.0),
-                                            child: buildButtonColumn(
-                                                Icons.not_interested)),
-                                        onTap: () {
-                                          _onRemoveSource(
-                                              data["articles"][index]["source"]
-                                                  ["id"],
-                                              data["articles"][index]["source"]
-                                                  ["name"]);
-                                        },
-                                      ),
                                     ],
-                                  ),
+                                  )
                                 ],
                               )
                             ],
@@ -304,11 +253,25 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       );
                     },
+                  )
+                : new Center(
+                    child: new Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        new Icon(Icons.chrome_reader_mode,
+                            color: Colors.grey, size: 60.0),
+                        new Text(
+                          "No articles saved",
+                          style:
+                              new TextStyle(fontSize: 24.0, color: Colors.grey),
+                        ),
+                      ],
+                    ),
                   ),
-          )
-        ]),
         onVerticalDragDown: _refresh(),
       ),
     );
   }
 }
+
+//merge homeScreen and eachNewScreen
