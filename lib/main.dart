@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import './HomeFeedScreen.dart' as HomeScreeen;
-import './LibraryScreen.dart' as LibraryScreen;
+import './HomeFeedScreen.dart' as HomeFeedScreeen;
+import './SourceLibraryScreen.dart' as SourceLibraryScreen;
 import './CategoriesScreen.dart' as CategoriesScreen;
 import './BookmarkScreen.dart' as BookmarkScreen;
 import './globalStore.dart' as globalStore;
@@ -50,8 +50,8 @@ class NewsBuzzState extends State<NewsBuzz>
               new Tab(icon: new Icon(Icons.bookmark, size: 30.0)),
             ])),
         body: new TabBarView(controller: controller, children: <Widget>[
-          new HomeScreeen.HomeScreen(),
-          new LibraryScreen.LibraryScreen(),
+          new HomeFeedScreeen.HomeFeedScreen(),
+          new SourceLibraryScreen.SourceLibraryScreen(),
           new CategoriesScreen.CategoriesScreen(),
           new BookmarkScreen.BookmarksScreen(),
         ]));

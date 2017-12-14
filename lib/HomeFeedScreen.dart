@@ -10,14 +10,14 @@ import 'package:timeago/timeago.dart';
 import './globalStore.dart' as globalStore;
 import './SearchScreen.dart' as SearchScreen;
 
-class HomeScreen extends StatefulWidget {
-  HomeScreen({Key key}) : super(key: key);
+class HomeFeedScreen extends StatefulWidget {
+  HomeFeedScreen({Key key}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => new _HomeScreenState();
+  _HomeFeedScreenState createState() => new _HomeFeedScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeFeedScreenState extends State<HomeFeedScreen> {
   var data;
   var newsSelection = "techcrunch";
   DataSnapshot snapshot;

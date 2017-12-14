@@ -1,4 +1,3 @@
-// Screen for the grid of choices and then redirect to the webview for each Grid Tile related URL
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -6,17 +5,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
-import './SourcesListScreen.dart' as SourcesListScreen;
+import './ArticleSourceScreen.dart' as ArticleSourceScreen;
 import './globalStore.dart' as globalStore;
 
-class LibraryScreen extends StatefulWidget {
-  LibraryScreen({Key key}) : super(key: key);
+class SourceLibraryScreen extends StatefulWidget {
+  SourceLibraryScreen({Key key}) : super(key: key);
 
   @override
-  _LibraryScreenState createState() => new _LibraryScreenState();
+  _SourceLibraryScreenState createState() => new _SourceLibraryScreenState();
 }
 
-class _LibraryScreenState extends State<LibraryScreen> {
+class _SourceLibraryScreenState extends State<SourceLibraryScreen> {
   DataSnapshot snapshot;
   var sources;
   bool change = false;
@@ -184,7 +183,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                             context,
                             new MaterialPageRoute(
                                 builder: (_) =>
-                                    new SourcesListScreen.SourcesListScreen(
+                                    new ArticleSourceScreen.ArticleSourceScreen(
                                       sourceId: sources['sources'][index]['id'],
                                       sourceName: sources['sources'][index]
                                           ['name'],

@@ -1,13 +1,6 @@
-// Screen for the grid of choices and then redirect to the webview for each Grid Tile related URL
-import 'dart:convert';
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart' as http;
-import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
-import './SourcesListScreen.dart' as SourcesListScreen;
-import './globalStore.dart' as globalStore;
+import './ArticleSourceScreen.dart' as ArticleSourceScreen;
 import './categoriesList.dart' as categoriesList;
 
 class CategoriesScreen extends StatefulWidget {
@@ -95,7 +88,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             context,
                             new MaterialPageRoute(
                                 builder: (_) =>
-                                    new SourcesListScreen.SourcesListScreen(
+                                    new ArticleSourceScreen.ArticleSourceScreen(
                                       sourceId: categoriesList.list[index]
                                           ['id'],
                                       sourceName: categoriesList.list[index]

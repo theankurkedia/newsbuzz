@@ -10,8 +10,8 @@ import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:timeago/timeago.dart';
 import './globalStore.dart' as globalStore;
 
-class SourcesListScreen extends StatefulWidget {
-  SourcesListScreen(
+class ArticleSourceScreen extends StatefulWidget {
+  ArticleSourceScreen(
       {Key key,
       this.sourceId = "techcrunch",
       this.sourceName = "TechCrunch",
@@ -21,14 +21,14 @@ class SourcesListScreen extends StatefulWidget {
   final sourceName;
   bool isCategory;
   @override
-  _SourcesListScreenState createState() => new _SourcesListScreenState(
+  _ArticleSourceScreenState createState() => new _ArticleSourceScreenState(
       sourceId: this.sourceId,
       sourceName: this.sourceName,
       isCategory: this.isCategory);
 }
 
-class _SourcesListScreenState extends State<SourcesListScreen> {
-  _SourcesListScreenState({this.sourceId, this.sourceName, this.isCategory});
+class _ArticleSourceScreenState extends State<ArticleSourceScreen> {
+  _ArticleSourceScreenState({this.sourceId, this.sourceName, this.isCategory});
   var data;
   final sourceId;
   final sourceName;
