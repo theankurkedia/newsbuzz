@@ -132,6 +132,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text(searchQuery)),
+      backgroundColor: Colors.grey[200],
       body: new GestureDetector(
         child: data == null
             ? const Center(
@@ -151,90 +152,96 @@ class _SearchScreenState extends State<SearchScreen> {
                     itemBuilder: (BuildContext context, int index) {
                       return new GestureDetector(
                         child: new Card(
-                          child: new Row(
-                            children: [
-                              new Expanded(
-                                child: new GestureDetector(
-                                  child: new Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      new Text(
-                                        data["articles"][index]["title"],
-                                        style: new TextStyle(
-                                          fontWeight: FontWeight.bold,
+                          child: new Padding(
+                            padding: new EdgeInsets.all(5.0),
+                            child: new Row(
+                              children: [
+                                new Expanded(
+                                  child: new GestureDetector(
+                                    child: new Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        new Text(
+                                          data["articles"][index]["title"],
+                                          style: new TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      new Text(
-                                        data["articles"][index]["description"],
-                                        style: new TextStyle(
-                                          color: Colors.black,
+                                        new Text(
+                                          data["articles"][index]
+                                              ["description"],
+                                          style: new TextStyle(
+                                            color: Colors.black,
+                                          ),
                                         ),
-                                      ),
-                                      new Text(
-                                        "Published " +
-                                            timeAgo(DateTime.parse(
-                                                data["articles"][index]
-                                                    ["publishedAt"])),
-                                        style: new TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.grey[800],
+                                        new Text(
+                                          "Published " +
+                                              timeAgo(DateTime.parse(
+                                                  data["articles"][index]
+                                                      ["publishedAt"])),
+                                          style: new TextStyle(
+                                            fontWeight: FontWeight.w400,
+                                            color: Colors.grey[800],
+                                          ),
                                         ),
-                                      ),
-                                      new Row(
-                                        children: <Widget>[
-                                          new Text(
-                                            "Source: ${ data["articles"][index]["source"]["name"]}",
-                                            style: new TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.black,
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  onTap: () {
-                                    flutterWebviewPlugin.launch(
-                                        data["articles"][index]["url"],
-                                        fullScreen: false);
-                                  },
-                                ),
-                              ),
-                              new Column(
-                                children: <Widget>[
-                                  new SizedBox(
-                                    height: 100.0,
-                                    width: 100.0,
-                                    child: new Image.network(
-                                      data["articles"][index]["urlToImage"],
-                                      fit: BoxFit.cover,
+                                        new Row(
+                                          children: <Widget>[
+                                            new Text(
+                                              "Source: ${ data["articles"][index]["source"]["name"]}",
+                                              style: new TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.black,
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ],
                                     ),
+                                    onTap: () {
+                                      flutterWebviewPlugin.launch(
+                                          data["articles"][index]["url"],
+                                          fullScreen: false);
+                                    },
                                   ),
-                                  new Row(
-                                    children: <Widget>[
-                                      new GestureDetector(
-                                        child: buildButtonColumn(Icons.share),
-                                        onTap: () {
-                                          share(data["articles"][index]["url"]);
-                                        },
+                                ),
+                                new Column(
+                                  children: <Widget>[
+                                    new SizedBox(
+                                      height: 100.0,
+                                      width: 100.0,
+                                      child: new Image.network(
+                                        data["articles"][index]["urlToImage"],
+                                        fit: BoxFit.cover,
                                       ),
-                                      new GestureDetector(
-                                        child: _hasArticle(
-                                                data["articles"][index])
-                                            ? buildButtonColumn(Icons.bookmark)
-                                            : buildButtonColumn(
-                                                Icons.bookmark_border),
-                                        onTap: () {
-                                          _onBookmarkTap(
-                                              data["articles"][index]);
-                                        },
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              )
-                            ],
+                                    ),
+                                    new Row(
+                                      children: <Widget>[
+                                        new GestureDetector(
+                                          child: buildButtonColumn(Icons.share),
+                                          onTap: () {
+                                            share(
+                                                data["articles"][index]["url"]);
+                                          },
+                                        ),
+                                        new GestureDetector(
+                                          child: _hasArticle(
+                                                  data["articles"][index])
+                                              ? buildButtonColumn(
+                                                  Icons.bookmark)
+                                              : buildButtonColumn(
+                                                  Icons.bookmark_border),
+                                          onTap: () {
+                                            _onBookmarkTap(
+                                                data["articles"][index]);
+                                          },
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       );

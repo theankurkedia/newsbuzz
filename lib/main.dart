@@ -40,6 +40,7 @@ class NewsBuzzState extends State<NewsBuzz>
     return new Scaffold(
         appBar: new AppBar(
           title: new Text("News Buzz"),
+          centerTitle: true,
         ),
         bottomNavigationBar: new Material(
             color: Colors.blue[600],

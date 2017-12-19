@@ -1,5 +1,5 @@
-name: newsapp
-description: A new Flutter project.
+name: NewsBuzz
+description: Daily News
 
 dependencies:
   flutter:
@@ -9,13 +9,14 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   share: "^0.2.1"
-  flutter_webview_plugin: "^0.0.6"
+  flutter_webview_plugin: "^0.0.9+1"
   google_sign_in: "^0.3.1"
-  firebase_analytics: "^0.1.0"
+  firebase_analytics: "^0.0.4"
   firebase_auth: "^0.2.0"
-  firebase_database: "^0.1.0"
+  firebase_database: "^0.0.12"
   firebase_storage: "^0.0.5"
   timeago: "^1.2.0"
+  cupertino_icons: ^0.1.0
 
 
 # For information on the generic Dart part of this file, see the
