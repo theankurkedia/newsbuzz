@@ -30,10 +30,12 @@ class _SourceLibraryScreenState extends State<SourceLibraryScreen> {
         });
 
     var snap = await globalStore.articleSourcesDatabaseReference.once();
-    this.setState(() {
-      sources = JSON.decode(libSources.body);
-      snapshot = snap;
-    });
+    if (mounted) {
+      this.setState(() {
+        sources = JSON.decode(libSources.body);
+        snapshot = snap;
+      });
+    }
     return "Success!";
   }
 
@@ -85,9 +87,35 @@ class _SourceLibraryScreenState extends State<SourceLibraryScreen> {
       pushSource(name, id);
     }
     this.getData();
-    this.setState(() {
-      change = true;
-    });
+    if (mounted) {
+      this.setState(() {
+        change = true;
+      });
+    }
+  }
+
+  CircleAvatar _loadAvatar(var url) {
+    if (url == "http://www.bleacherreport.com") {
+      return new CircleAvatar(
+        backgroundColor: Colors.transparent,
+        backgroundImage: new NetworkImage(
+            "http://static-assets.bleacherreport.com/favicon.ico"),
+        radius: 40.0,
+      );
+    }
+    try {
+      return new CircleAvatar(
+        backgroundColor: Colors.transparent,
+        backgroundImage: new NetworkImage(
+            "https://icons.better-idea.org/icon?url=" + url + "&size=120"),
+        radius: 40.0,
+      );
+    } catch (Exception) {
+      return new CircleAvatar(
+        child: new Icon(Icons.library_books),
+        radius: 40.0,
+      );
+    }
   }
 
   @override
@@ -143,15 +171,8 @@ class _SourceLibraryScreenState extends State<SourceLibraryScreen> {
                                   children: <Widget>[
                                     new SizedBox(
                                       child: new Container(
-                                        child: new CircleAvatar(
-                                          backgroundColor: Colors.transparent,
-                                          backgroundImage: new NetworkImage(
-                                              "https://icons.better-idea.org/icon?url=" +
-                                                  sources['sources'][index]
-                                                      ['url'] +
-                                                  "&size=120"),
-                                          radius: 40.0,
-                                        ),
+                                        child: _loadAvatar(
+                                            sources['sources'][index]['url']),
                                         padding: const EdgeInsets.only(
                                             left: 10.0, top: 20.0, right: 10.0),
                                       ),

@@ -47,10 +47,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
     var snap = await globalStore.articleDatabaseReference.once();
 
-    this.setState(() {
-      data = JSON.decode(response.body);
-      snapshot = snap;
-    });
+    if (mounted) {
+      this.setState(() {
+        data = JSON.decode(response.body);
+        snapshot = snap;
+      });
+    }
     return "Success!";
   }
 
@@ -101,9 +103,11 @@ class _SearchScreenState extends State<SearchScreen> {
               backgroundColor: Colors.grey[600],
             ));
       }
-      this.setState(() {
-        change = true;
-      });
+      if (mounted) {
+        this.setState(() {
+          change = true;
+        });
+      }
     } else {
       pushArticle(article);
     }
@@ -153,93 +157,131 @@ class _SearchScreenState extends State<SearchScreen> {
                       return new GestureDetector(
                         child: new Card(
                           child: new Padding(
-                            padding: new EdgeInsets.all(5.0),
-                            child: new Row(
+                            padding: new EdgeInsets.all(10.0),
+                            child: new Column(
                               children: [
-                                new Expanded(
-                                  child: new GestureDetector(
-                                    child: new Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        new Text(
-                                          data["articles"][index]["title"],
-                                          style: new TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                new Row(
+                                  children: <Widget>[
+                                    new Padding(
+                                      padding: new EdgeInsets.only(left: 4.0),
+                                      child: new Text(
+                                        timeAgo(DateTime.parse(data["articles"]
+                                            [index]["publishedAt"])),
+                                        style: new TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.grey[600],
                                         ),
-                                        new Text(
-                                          data["articles"][index]
-                                              ["description"],
-                                          style: new TextStyle(
-                                            color: Colors.black,
-                                          ),
+                                      ),
+                                    ),
+                                    new Padding(
+                                      padding: new EdgeInsets.all(5.0),
+                                      child: new Text(
+                                        data["articles"][index]["source"]
+                                            ["name"],
+                                        style: new TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.grey[700],
                                         ),
-                                        new Text(
-                                          "Published " +
-                                              timeAgo(DateTime.parse(
-                                                  data["articles"][index]
-                                                      ["publishedAt"])),
-                                          style: new TextStyle(
-                                            fontWeight: FontWeight.w400,
-                                            color: Colors.grey[800],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                new Row(
+                                  children: [
+                                    new Expanded(
+                                      child: new GestureDetector(
+                                        child: new Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            new Padding(
+                                              padding: new EdgeInsets.only(
+                                                  left: 4.0,
+                                                  right: 8.0,
+                                                  bottom: 8.0,
+                                                  top: 8.0),
+                                              child: new Text(
+                                                data["articles"][index]
+                                                    ["title"],
+                                                style: new TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            new Padding(
+                                              padding: new EdgeInsets.only(
+                                                  left: 4.0,
+                                                  right: 4.0,
+                                                  bottom: 4.0),
+                                              child: new Text(
+                                                data["articles"][index]
+                                                    ["description"],
+                                                style: new TextStyle(
+                                                  color: Colors.grey[500],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        onTap: () {
+                                          flutterWebviewPlugin.launch(
+                                              data["articles"][index]["url"],
+                                              fullScreen: false);
+                                        },
+                                      ),
+                                    ),
+                                    new Column(
+                                      children: <Widget>[
+                                        new Padding(
+                                          padding:
+                                              new EdgeInsets.only(top: 8.0),
+                                          child: new SizedBox(
+                                            height: 100.0,
+                                            width: 100.0,
+                                            child: new Image.network(
+                                              data["articles"][index]
+                                                  ["urlToImage"],
+                                              fit: BoxFit.cover,
+                                            ),
                                           ),
                                         ),
                                         new Row(
                                           children: <Widget>[
-                                            new Text(
-                                              "Source: ${ data["articles"][index]["source"]["name"]}",
-                                              style: new TextStyle(
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.black,
-                                              ),
-                                            )
+                                            new GestureDetector(
+                                              child: new Padding(
+                                                  padding:
+                                                      new EdgeInsets.symmetric(
+                                                          vertical: 10.0,
+                                                          horizontal: 5.0),
+                                                  child: buildButtonColumn(
+                                                      Icons.share)),
+                                              onTap: () {
+                                                share(data["articles"][index]
+                                                    ["url"]);
+                                              },
+                                            ),
+                                            new GestureDetector(
+                                              child: new Padding(
+                                                  padding:
+                                                      new EdgeInsets.all(5.0),
+                                                  child: _hasArticle(
+                                                          data["articles"]
+                                                              [index])
+                                                      ? buildButtonColumn(
+                                                          Icons.bookmark)
+                                                      : buildButtonColumn(Icons
+                                                          .bookmark_border)),
+                                              onTap: () {
+                                                _onBookmarkTap(
+                                                    data["articles"][index]);
+                                              },
+                                            ),
                                           ],
-                                        ),
-                                      ],
-                                    ),
-                                    onTap: () {
-                                      flutterWebviewPlugin.launch(
-                                          data["articles"][index]["url"],
-                                          fullScreen: false);
-                                    },
-                                  ),
-                                ),
-                                new Column(
-                                  children: <Widget>[
-                                    new SizedBox(
-                                      height: 100.0,
-                                      width: 100.0,
-                                      child: new Image.network(
-                                        data["articles"][index]["urlToImage"],
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    new Row(
-                                      children: <Widget>[
-                                        new GestureDetector(
-                                          child: buildButtonColumn(Icons.share),
-                                          onTap: () {
-                                            share(
-                                                data["articles"][index]["url"]);
-                                          },
-                                        ),
-                                        new GestureDetector(
-                                          child: _hasArticle(
-                                                  data["articles"][index])
-                                              ? buildButtonColumn(
-                                                  Icons.bookmark)
-                                              : buildButtonColumn(
-                                                  Icons.bookmark_border),
-                                          onTap: () {
-                                            _onBookmarkTap(
-                                                data["articles"][index]);
-                                          },
-                                        ),
+                                        )
                                       ],
                                     )
                                   ],
-                                )
+                                ),
                               ],
                             ),
                           ),

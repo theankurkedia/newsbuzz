@@ -1,4 +1,4 @@
-package com.yourcompany.newsapp;
+package com.yourcompany.news;
 
 import android.os.Bundle;
 

@@ -22,9 +22,11 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
 
   Future updateSnapshot() async {
     var snap = await globalStore.articleDatabaseReference.once();
-    this.setState(() {
-      snapshot = snap;
-    });
+    if (mounted) {
+      this.setState(() {
+        snapshot = snap;
+      });
+    }
     return "Success!";
   }
 
@@ -47,9 +49,11 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         }
       });
       this.updateSnapshot();
-      this.setState(() {
-        change = true;
-      });
+      if (mounted) {
+        this.setState(() {
+          change = true;
+        });
+      }
     }
   }
 
@@ -81,85 +85,114 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                     return new GestureDetector(
                       child: new Card(
                         child: new Padding(
-                          padding: new EdgeInsets.all(5.0),
-                          child: new Row(
+                          padding: new EdgeInsets.all(10.0),
+                          child: new Column(
                             children: [
-                              new Expanded(
-                                child: new GestureDetector(
-                                  child: new Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      new Text(
-                                        snapshot.value["title"],
-                                        style: new TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                              new Row(
+                                children: <Widget>[
+                                  new Padding(
+                                    padding: new EdgeInsets.only(left: 4.0),
+                                    child: new Text(
+                                      timeAgo(DateTime.parse(
+                                          snapshot.value["publishedAt"])),
+                                      style: new TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.grey[600],
                                       ),
-                                      new Text(
-                                        snapshot.value["description"],
-                                        style: new TextStyle(
-                                          color: Colors.grey[500],
-                                        ),
+                                    ),
+                                  ),
+                                  new Padding(
+                                    padding: new EdgeInsets.all(5.0),
+                                    child: new Text(
+                                      snapshot.value["source"],
+                                      style: new TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.grey[700],
                                       ),
-                                      new Text(
-                                        "Published " +
-                                            timeAgo(DateTime.parse(
-                                                snapshot.value["publishedAt"])),
-                                        style: new TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.grey[800],
-                                        ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              new Row(
+                                children: [
+                                  new Expanded(
+                                    child: new GestureDetector(
+                                      child: new Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          new Padding(
+                                            padding: new EdgeInsets.only(
+                                                left: 4.0,
+                                                right: 8.0,
+                                                bottom: 8.0,
+                                                top: 8.0),
+                                            child: new Text(
+                                              snapshot.value["title"],
+                                              style: new TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          new Padding(
+                                            padding: new EdgeInsets.only(
+                                                left: 4.0,
+                                                right: 4.0,
+                                                bottom: 4.0),
+                                            child: new Text(
+                                              snapshot.value["description"],
+                                              style: new TextStyle(
+                                                color: Colors.grey[500],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
+                                      onTap: () {
+                                        flutterWebviewPlugin.launch(
+                                            snapshot.value["url"],
+                                            fullScreen: false);
+                                      },
+                                    ),
+                                  ),
+                                  new Column(
+                                    children: <Widget>[
                                       new Padding(
-                                        padding: new EdgeInsets.all(5.0),
-                                        child: new Text(
-                                          "Source: ${snapshot.value["source"]}",
-                                          style: new TextStyle(
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black,
+                                        padding: new EdgeInsets.only(top: 8.0),
+                                        child: new SizedBox(
+                                          height: 100.0,
+                                          width: 100.0,
+                                          child: new Image.network(
+                                            snapshot.value["urlToImage"],
+                                            fit: BoxFit.cover,
                                           ),
                                         ),
                                       ),
+                                      new Row(
+                                        children: <Widget>[
+                                          new GestureDetector(
+                                            child: new Padding(
+                                                padding:
+                                                    new EdgeInsets.symmetric(
+                                                        vertical: 10.0,
+                                                        horizontal: 5.0),
+                                                child: buildButtonColumn(
+                                                    Icons.share)),
+                                            onTap: () {
+                                              share(snapshot.value["url"]);
+                                            },
+                                          ),
+                                          new GestureDetector(
+                                            child: buildButtonColumn(
+                                                Icons.bookmark),
+                                            onTap: () {
+                                              _onBookmarkTap(snapshot.value);
+                                            },
+                                          ),
+                                        ],
+                                      )
                                     ],
                                   ),
-                                  onTap: () {
-                                    flutterWebviewPlugin.launch(
-                                        snapshot.value["url"],
-                                        fullScreen: false);
-                                  },
-                                ),
-                              ),
-                              new Column(
-                                children: <Widget>[
-                                  new SizedBox(
-                                    height: 100.0,
-                                    width: 100.0,
-                                    child: new Image.network(
-                                      snapshot.value["urlToImage"],
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  new Row(
-                                    children: <Widget>[
-                                      new GestureDetector(
-                                        child: new Padding(
-                                            padding: new EdgeInsets.all(5.0),
-                                            child:
-                                                buildButtonColumn(Icons.share)),
-                                        onTap: () {
-                                          share(snapshot.value["url"]);
-                                        },
-                                      ),
-                                      new GestureDetector(
-                                        child:
-                                            buildButtonColumn(Icons.bookmark),
-                                        onTap: () {
-                                          _onBookmarkTap(snapshot.value);
-                                        },
-                                      ),
-                                    ],
-                                  )
                                 ],
                               ),
                             ],
