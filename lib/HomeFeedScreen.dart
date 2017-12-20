@@ -52,12 +52,12 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
               ? b["publishedAt"].compareTo(a["publishedAt"])
               : null);
     }
-    if (mounted) {
-      this.setState(() {
-        data = localData;
-        snapshot = snap;
-      });
-    }
+    // if (mounted) {
+    this.setState(() {
+      data = localData;
+      snapshot = snap;
+    });
+    // }
     return "Success!";
   }
 
@@ -188,8 +188,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                 controller: _controller,
                 onSubmitted: handleTextInputSubmit,
                 decoration: new InputDecoration(
-                    hintText: 'Finding Something?',
-                    icon: new Icon(Icons.search)),
+                    hintText: 'Finding a news?', icon: new Icon(Icons.search)),
               ),
             ),
           ),

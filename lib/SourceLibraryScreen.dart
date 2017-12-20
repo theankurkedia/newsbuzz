@@ -70,7 +70,7 @@ class _SourceLibraryScreenState extends State<SourceLibraryScreen> {
         if (v['id'].compareTo(id) == 0) {
           flag = 1;
           Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('News source removed'),
+                content: new Text('$name removed'),
                 backgroundColor: Colors.grey[600],
               ));
           globalStore.articleSourcesDatabaseReference.child(k).remove();
@@ -78,9 +78,8 @@ class _SourceLibraryScreenState extends State<SourceLibraryScreen> {
       });
       if (flag != 1) {
         Scaffold.of(context).showSnackBar(new SnackBar(
-              content: new Text('News source added'),
-              backgroundColor: Colors.grey[600],
-            ));
+            content: new Text('$name added'),
+            backgroundColor: Colors.grey[600]));
         pushSource(name, id);
       }
     } else {

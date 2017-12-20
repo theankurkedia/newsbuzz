@@ -103,11 +103,11 @@ class _SearchScreenState extends State<SearchScreen> {
               backgroundColor: Colors.grey[600],
             ));
       }
-      if (mounted) {
-        this.setState(() {
-          change = true;
-        });
-      }
+      // if (mounted) {
+      this.setState(() {
+        change = true;
+      });
+      // }
     } else {
       pushArticle(article);
     }

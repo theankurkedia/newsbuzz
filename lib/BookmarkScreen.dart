@@ -22,11 +22,9 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
 
   Future updateSnapshot() async {
     var snap = await globalStore.articleDatabaseReference.once();
-    if (mounted) {
-      this.setState(() {
-        snapshot = snap;
-      });
-    }
+    this.setState(() {
+      snapshot = snap;
+    });
     return "Success!";
   }
 
@@ -49,11 +47,9 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         }
       });
       this.updateSnapshot();
-      if (mounted) {
-        this.setState(() {
-          change = true;
-        });
-      }
+      this.setState(() {
+        change = true;
+      });
     }
   }
 

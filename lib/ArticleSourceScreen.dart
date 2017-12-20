@@ -122,11 +122,9 @@ class _ArticleSourceScreenState extends State<ArticleSourceScreen> {
               backgroundColor: Colors.grey[600],
             ));
       }
-      if (mounted) {
-        this.setState(() {
-          change = true;
-        });
-      }
+      this.setState(() {
+        change = true;
+      });
     } else {
       pushArticle(article);
     }
@@ -184,6 +182,17 @@ class _ArticleSourceScreenState extends State<ArticleSourceScreen> {
                                         style: new TextStyle(
                                           fontWeight: FontWeight.w400,
                                           color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ),
+                                    new Padding(
+                                      padding: new EdgeInsets.all(5.0),
+                                      child: new Text(
+                                        data["articles"][index]["source"]
+                                            ["name"],
+                                        style: new TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.grey[700],
                                         ),
                                       ),
                                     ),
@@ -251,20 +260,29 @@ class _ArticleSourceScreenState extends State<ArticleSourceScreen> {
                                         new Row(
                                           children: <Widget>[
                                             new GestureDetector(
-                                              child: buildButtonColumn(
-                                                  Icons.share),
+                                              child: new Padding(
+                                                  padding:
+                                                      new EdgeInsets.symmetric(
+                                                          vertical: 10.0,
+                                                          horizontal: 5.0),
+                                                  child: buildButtonColumn(
+                                                      Icons.share)),
                                               onTap: () {
                                                 share(data["articles"][index]
                                                     ["url"]);
                                               },
                                             ),
                                             new GestureDetector(
-                                              child: _hasArticle(
-                                                      data["articles"][index])
-                                                  ? buildButtonColumn(
-                                                      Icons.bookmark)
-                                                  : buildButtonColumn(
-                                                      Icons.bookmark_border),
+                                              child: new Padding(
+                                                  padding:
+                                                      new EdgeInsets.all(5.0),
+                                                  child: _hasArticle(
+                                                          data["articles"]
+                                                              [index])
+                                                      ? buildButtonColumn(
+                                                          Icons.bookmark)
+                                                      : buildButtonColumn(Icons
+                                                          .bookmark_border)),
                                               onTap: () {
                                                 _onBookmarkTap(
                                                     data["articles"][index]);
