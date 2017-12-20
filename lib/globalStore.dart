@@ -4,17 +4,17 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-String userId;
 var sourceList = [];
 final googleSignIn = new GoogleSignIn();
 final analytics = new FirebaseAnalytics();
 final auth = FirebaseAuth.instance;
 final databaseReference = FirebaseDatabase.instance.reference();
+GoogleSignInAccount user;
 var userDatabaseReference;
 var articleSourcesDatabaseReference;
 var articleDatabaseReference;
 Future<Null> _ensureLoggedIn() async {
-  GoogleSignInAccount user = googleSignIn.currentUser;
+  user = googleSignIn.currentUser;
   if (user == null) {
     user = await googleSignIn.signInSilently();
   }
@@ -30,7 +30,7 @@ Future<Null> _ensureLoggedIn() async {
       accessToken: credentials.accessToken,
     );
   }
-  userId = user.id;
+
   userDatabaseReference = databaseReference.child(user.id);
   articleDatabaseReference = databaseReference.child(user.id).child('articles');
   articleSourcesDatabaseReference =

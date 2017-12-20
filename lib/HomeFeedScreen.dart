@@ -175,28 +175,26 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      resizeToAvoidBottomPadding: false,
       backgroundColor: Colors.grey[200],
       body: new GestureDetector(
         child: new Column(children: <Widget>[
           new Padding(
             padding: new EdgeInsets.all(4.0),
-            child: new Container(
-              decoration: new BoxDecoration(
-                color: Colors.white,
-              ),
+            child: new PhysicalModel(
+              color: Colors.white,
+              elevation: 10.0,
               child: new TextField(
                 controller: _controller,
                 onSubmitted: handleTextInputSubmit,
                 decoration: new InputDecoration(
-                    hintText: 'Finding a news?', icon: new Icon(Icons.search)),
+                    hintText: 'Finding a News?', icon: new Icon(Icons.search)),
               ),
             ),
           ),
           new Expanded(
             child: data == null
-                ? const Center(
-                    child: const CupertinoActivityIndicator(),
-                  )
+                ? const Center(child: const CircularProgressIndicator())
                 : new ListView.builder(
                     itemCount: data == null ? 0 : data["articles"].length,
                     padding: new EdgeInsets.all(8.0),

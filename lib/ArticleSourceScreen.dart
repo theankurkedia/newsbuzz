@@ -62,7 +62,7 @@ class _ArticleSourceScreenState extends State<ArticleSourceScreen> {
             "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
           });
     }
-    userDatabaseReference = databaseReference.child(globalStore.userId);
+    userDatabaseReference = databaseReference.child(globalStore.user.id);
     articleDatabaseReference = userDatabaseReference.child('articles');
     var snap = await articleDatabaseReference.once();
     if (mounted) {
@@ -154,13 +154,14 @@ class _ArticleSourceScreenState extends State<ArticleSourceScreen> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text(sourceName)),
+      appBar: new AppBar(
+        title: new Text(sourceName),
+        centerTitle: true,
+      ),
       backgroundColor: Colors.grey[200],
       body: new GestureDetector(
         child: data == null
-            ? const Center(
-                child: const CupertinoActivityIndicator(),
-              )
+            ? const Center(child: const CircularProgressIndicator())
             : data["articles"].length != 0
                 ? new ListView.builder(
                     itemCount: data == null ? 0 : data["articles"].length,

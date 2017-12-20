@@ -21,9 +21,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     return new Scaffold(
       backgroundColor: Colors.grey[200],
       body: categoriesList.list == null
-          ? const Center(
-              child: const CupertinoActivityIndicator(),
-            )
+          ? const Center(child: const CircularProgressIndicator())
           : new GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3, mainAxisSpacing: 25.0),

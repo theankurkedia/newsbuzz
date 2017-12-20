@@ -135,22 +135,34 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text(searchQuery)),
+      appBar: new AppBar(
+        title: new Text(searchQuery),
+        centerTitle: true,
+      ),
       backgroundColor: Colors.grey[200],
       body: new GestureDetector(
         child: data == null
-            ? const Center(
-                child: const CupertinoActivityIndicator(),
-              )
+            ? const Center(child: const CircularProgressIndicator())
             : data["articles"].length < 1
-                ? new Center(
-                    child: new Text(
-                      "Could not find anything related to '$searchQuery'",
-                      style: new TextStyle(
-                        color: Colors.black,
-                      ),
-                    ),
-                  )
+                ? new Padding(
+                    padding: new EdgeInsets.only(top: 60.0),
+                    child: new Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          new Icon(Icons.error_outline,
+                              size: 60.0, color: Colors.redAccent[200]),
+                          new Center(
+                            child: new Text(
+                              "Could not find anything related to '$searchQuery'",
+                              textScaleFactor: 1.5,
+                              textAlign: TextAlign.center,
+                              style: new TextStyle(
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          )
+                        ]))
                 : new ListView.builder(
                     itemCount: data['articles'].length,
                     itemBuilder: (BuildContext context, int index) {

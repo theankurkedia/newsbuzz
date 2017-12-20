@@ -128,9 +128,7 @@ class _SourceLibraryScreenState extends State<SourceLibraryScreen> {
     return new Scaffold(
       backgroundColor: Colors.grey[200],
       body: sources == null
-          ? const Center(
-              child: const CupertinoActivityIndicator(),
-            )
+          ? const Center(child: const CircularProgressIndicator())
           : new GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3, mainAxisSpacing: 25.0),
@@ -181,9 +179,14 @@ class _SourceLibraryScreenState extends State<SourceLibraryScreen> {
                                       child: new GestureDetector(
                                         child: _hasSource(
                                                 sources['sources'][index]['id'])
-                                            ? new Icon(Icons.check_circle)
+                                            ? new Icon(
+                                                Icons.check_circle,
+                                                color: Colors.greenAccent[700],
+                                              )
                                             : new Icon(
-                                                Icons.add_circle_outline),
+                                                Icons.add_circle_outline,
+                                                color: Colors.grey[500],
+                                              ),
                                         onTap: () {
                                           _onAddTap(
                                               sources['sources'][index]['name'],
