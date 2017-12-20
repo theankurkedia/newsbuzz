@@ -1,6 +1,6 @@
 # News Buzz
 
-News App created in `Flutter` using `News API` and uses `Firebase` as the backend and authentication.
+News App created in Flutter using News API for fetching realtime data and Firebase as the backend and authenticator.
 
 
 ## Features
