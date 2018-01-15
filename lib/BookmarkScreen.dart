@@ -80,6 +80,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                       (_, DataSnapshot snapshot, Animation<double> animation) {
                     return new GestureDetector(
                       child: new Card(
+                        elevation: 1.7,
                         child: new Padding(
                           padding: new EdgeInsets.all(10.0),
                           child: new Column(

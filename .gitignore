@@ -9,3 +9,5 @@ packages
 pubspec.lock
 .flutter-plugins
 google-services.json
+key.properties
+ios/GoogleService-Info.plist

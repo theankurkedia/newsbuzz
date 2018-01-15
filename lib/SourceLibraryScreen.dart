@@ -171,7 +171,7 @@ class _SourceLibraryScreenState extends State<SourceLibraryScreen> {
                                         child: _loadAvatar(
                                             sources['sources'][index]['url']),
                                         padding: const EdgeInsets.only(
-                                            left: 10.0, top: 20.0, right: 10.0),
+                                            left: 10.0, top: 12.0, right: 10.0),
                                       ),
                                     ),
                                     new Positioned(

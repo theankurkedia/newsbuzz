@@ -31,8 +31,8 @@ class NewsBuzzState extends State<NewsBuzz>
 
   @override
   void dispose() {
-    controller.dispose();
     super.dispose();
+    controller.dispose();
   }
 
   @override

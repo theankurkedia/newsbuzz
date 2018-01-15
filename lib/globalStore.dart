@@ -19,8 +19,13 @@ Future<Null> _ensureLoggedIn() async {
     user = await googleSignIn.signInSilently();
   }
   if (user == null) {
-    await googleSignIn.signIn();
+    user = await googleSignIn.signIn();
     analytics.logLogin();
+    userDatabaseReference = databaseReference.child(user.id);
+    articleDatabaseReference =
+        databaseReference.child(user.id).child('articles');
+    articleSourcesDatabaseReference =
+        databaseReference.child(user.id).child('sources');
   }
   if (await auth.currentUser() == null) {
     GoogleSignInAuthentication credentials =
@@ -29,12 +34,13 @@ Future<Null> _ensureLoggedIn() async {
       idToken: credentials.idToken,
       accessToken: credentials.accessToken,
     );
+  } else {
+    userDatabaseReference = databaseReference.child(user.id);
+    articleDatabaseReference =
+        databaseReference.child(user.id).child('articles');
+    articleSourcesDatabaseReference =
+        databaseReference.child(user.id).child('sources');
   }
-
-  userDatabaseReference = databaseReference.child(user.id);
-  articleDatabaseReference = databaseReference.child(user.id).child('articles');
-  articleSourcesDatabaseReference =
-      databaseReference.child(user.id).child('sources');
 }
 
 var logIn = _ensureLoggedIn();
