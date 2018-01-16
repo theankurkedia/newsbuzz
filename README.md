@@ -46,7 +46,6 @@ $ cd newsbuzz/
 3. (skip if not running on Android)
 
 * Create an app within your Firebase instance for Android, with package name com.yourcompany.news
-* Follow instructions to download google-services.json, and place it into `newsbuzz/android/app/`
 * Run the following command to get your SHA-1 key:
 
 ```
@@ -55,6 +54,8 @@ keytool -exportcert -list -v \
 ```
 
 * In the Firebase console, in the settings of your Android app, add your SHA-1 key by clicking "Add Fingerprint".
+* Follow instructions to download google-services.json
+* place `google-services.json` into `newsbuzz/android/app/`.
 
 4. (skip if not running on iOS)
 
