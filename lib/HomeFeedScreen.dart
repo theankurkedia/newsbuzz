@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
-import 'package:timeago/timeago.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import './globalStore.dart' as globalStore;
 import './SearchScreen.dart' as SearchScreen;
 
@@ -22,7 +22,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
   var newsSelection = "techcrunch";
   DataSnapshot snapshot;
   var snapSources;
-  TimeAgo ta = new TimeAgo();
+  // TimeAgo ta = new TimeAgo();
   final FlutterWebviewPlugin flutterWebviewPlugin = new FlutterWebviewPlugin();
   final TextEditingController _controller = new TextEditingController();
   Future getData() async {
@@ -45,7 +45,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
           "Accept": "application/json",
           "X-Api-Key": "ab31ce4a49814a27bbb16dd5c5c06608"
         });
-    var localData = JSON.decode(response.body);
+    var localData = jsonDecode(response.body);
     if (localData != null && localData["articles"] != null) {
       localData["articles"].sort((a, b) =>
           a["publishedAt"] != null && b["publishedAt"] != null
@@ -98,16 +98,16 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
           flag = 1;
           globalStore.articleDatabaseReference.child(k).remove();
           Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('Article removed'),
-                backgroundColor: Colors.grey[600],
-              ));
+            content: new Text('Article removed'),
+            backgroundColor: Colors.grey[600],
+          ));
         }
       });
       if (flag != 1) {
         Scaffold.of(context).showSnackBar(new SnackBar(
-              content: new Text('Article saved'),
-              backgroundColor: Colors.grey[600],
-            ));
+          content: new Text('Article saved'),
+          backgroundColor: Colors.grey[600],
+        ));
         pushArticle(article);
       }
     } else {
@@ -121,20 +121,20 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
       snapSources.value.forEach((key, source) {
         if (source['id'].compareTo(id) == 0) {
           Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('Are you sure you want to remove $name?'),
-                backgroundColor: Colors.grey[600],
-                duration: new Duration(seconds: 3),
-                action: new SnackBarAction(
-                    label: 'Yes',
-                    onPressed: () {
-                      globalStore.articleSourcesDatabaseReference
-                          .child(key)
-                          .remove();
-                      Scaffold.of(context).showSnackBar(new SnackBar(
-                          content: new Text('$name removed'),
-                          backgroundColor: Colors.grey[600]));
-                    }),
-              ));
+            content: new Text('Are you sure you want to remove $name?'),
+            backgroundColor: Colors.grey[600],
+            duration: new Duration(seconds: 3),
+            action: new SnackBarAction(
+                label: 'Yes',
+                onPressed: () {
+                  globalStore.articleSourcesDatabaseReference
+                      .child(key)
+                      .remove();
+                  Scaffold.of(context).showSnackBar(new SnackBar(
+                      content: new Text('$name removed'),
+                      backgroundColor: Colors.grey[600]));
+                }),
+          ));
         }
       });
       this.getData();
@@ -206,8 +206,9 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                                     new Padding(
                                       padding: new EdgeInsets.only(left: 4.0),
                                       child: new Text(
-                                        timeAgo(DateTime.parse(data["articles"]
-                                            [index]["publishedAt"])),
+                                        timeago.format(DateTime.parse(
+                                            data["articles"][index]
+                                                ["publishedAt"])),
                                         style: new TextStyle(
                                           fontWeight: FontWeight.w400,
                                           color: Colors.grey[600],
@@ -266,8 +267,8 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                                         ),
                                         onTap: () {
                                           flutterWebviewPlugin.launch(
-                                              data["articles"][index]["url"],
-                                              fullScreen: false);
+                                            data["articles"][index]["url"],
+                                          );
                                         },
                                       ),
                                     ),
@@ -297,8 +298,8 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                                                   child: buildButtonColumn(
                                                       Icons.share)),
                                               onTap: () {
-                                                share(data["articles"][index]
-                                                    ["url"]);
+                                                Share.share(data["articles"]
+                                                    [index]["url"]);
                                               },
                                             ),
                                             new GestureDetector(

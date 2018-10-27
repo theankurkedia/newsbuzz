@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
-import 'package:timeago/timeago.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import './globalStore.dart' as globalStore;
 
 class ArticleSourceScreen extends StatefulWidget {
@@ -67,7 +67,7 @@ class _ArticleSourceScreenState extends State<ArticleSourceScreen> {
     var snap = await articleDatabaseReference.once();
     if (mounted) {
       this.setState(() {
-        data = JSON.decode(response.body);
+        data = jsonDecode(response.body);
         snapshot = snap;
       });
     }
@@ -110,17 +110,17 @@ class _ArticleSourceScreenState extends State<ArticleSourceScreen> {
           flag = 1;
           articleDatabaseReference.child(k).remove();
           Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('Article removed'),
-                backgroundColor: Colors.grey[600],
-              ));
+            content: new Text('Article removed'),
+            backgroundColor: Colors.grey[600],
+          ));
         }
       });
       if (flag != 1) {
         pushArticle(article);
         Scaffold.of(context).showSnackBar(new SnackBar(
-              content: new Text('Article added'),
-              backgroundColor: Colors.grey[600],
-            ));
+          content: new Text('Article added'),
+          backgroundColor: Colors.grey[600],
+        ));
       }
       this.setState(() {
         change = true;
@@ -173,8 +173,9 @@ class _ArticleSourceScreenState extends State<ArticleSourceScreen> {
                                   new Padding(
                                     padding: new EdgeInsets.only(left: 4.0),
                                     child: new Text(
-                                      timeAgo(DateTime.parse(data["articles"]
-                                          [index]["publishedAt"])),
+                                      timeago.format(DateTime.parse(
+                                          data["articles"][index]
+                                              ["publishedAt"])),
                                       style: new TextStyle(
                                         fontWeight: FontWeight.w400,
                                         color: Colors.grey[600],
@@ -231,8 +232,7 @@ class _ArticleSourceScreenState extends State<ArticleSourceScreen> {
                                       ),
                                       onTap: () {
                                         flutterWebviewPlugin.launch(
-                                            data["articles"][index]["url"],
-                                            fullScreen: false);
+                                            data["articles"][index]["url"]);
                                       },
                                     ),
                                   ),
@@ -261,8 +261,8 @@ class _ArticleSourceScreenState extends State<ArticleSourceScreen> {
                                                 child: buildButtonColumn(
                                                     Icons.share)),
                                             onTap: () {
-                                              share(data["articles"][index]
-                                                  ["url"]);
+                                              Share.share(data["articles"]
+                                                  [index]["url"]);
                                             },
                                           ),
                                           new GestureDetector(

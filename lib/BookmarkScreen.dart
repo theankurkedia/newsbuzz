@@ -5,7 +5,7 @@ import 'package:share/share.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
-import 'package:timeago/timeago.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import './globalStore.dart' as globalStore;
 
 class BookmarksScreen extends StatefulWidget {
@@ -41,9 +41,9 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         if (v['url'].compareTo(article['url']) == 0) {
           globalStore.articleDatabaseReference.child(k).remove();
           Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('Article removed'),
-                backgroundColor: Colors.grey[600],
-              ));
+            content: new Text('Article removed'),
+            backgroundColor: Colors.grey[600],
+          ));
         }
       });
       this.updateSnapshot();
@@ -76,8 +76,8 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                   query: globalStore.articleDatabaseReference,
                   sort: (a, b) => b.key.compareTo(a.key),
                   padding: new EdgeInsets.all(2.0),
-                  itemBuilder:
-                      (_, DataSnapshot snapshot, Animation<double> animation) {
+                  itemBuilder: (_, DataSnapshot snapshot,
+                      Animation<double> animation, int index) {
                     return new GestureDetector(
                       child: new Card(
                         elevation: 1.7,
@@ -90,7 +90,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                                   new Padding(
                                     padding: new EdgeInsets.only(left: 4.0),
                                     child: new Text(
-                                      timeAgo(DateTime.parse(
+                                      timeago.format(DateTime.parse(
                                           snapshot.value["publishedAt"])),
                                       style: new TextStyle(
                                         fontWeight: FontWeight.w400,
@@ -147,8 +147,8 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                                       ),
                                       onTap: () {
                                         flutterWebviewPlugin.launch(
-                                            snapshot.value["url"],
-                                            fullScreen: false);
+                                          snapshot.value["url"],
+                                        );
                                       },
                                     ),
                                   ),
@@ -176,7 +176,8 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                                                 child: buildButtonColumn(
                                                     Icons.share)),
                                             onTap: () {
-                                              share(snapshot.value["url"]);
+                                              Share.share(
+                                                  snapshot.value["url"]);
                                             },
                                           ),
                                           new GestureDetector(
