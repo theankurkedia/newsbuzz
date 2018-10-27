@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -32,7 +32,7 @@ class _SourceLibraryScreenState extends State<SourceLibraryScreen> {
     var snap = await globalStore.articleSourcesDatabaseReference.once();
     if (mounted) {
       this.setState(() {
-        sources = JSON.decode(libSources.body);
+        sources = jsonDecode(libSources.body);
         snapshot = snap;
       });
     }
@@ -70,9 +70,9 @@ class _SourceLibraryScreenState extends State<SourceLibraryScreen> {
         if (v['id'].compareTo(id) == 0) {
           flag = 1;
           Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('$name removed'),
-                backgroundColor: Colors.grey[600],
-              ));
+            content: new Text('$name removed'),
+            backgroundColor: Colors.grey[600],
+          ));
           globalStore.articleSourcesDatabaseReference.child(k).remove();
         }
       });
